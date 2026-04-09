@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeautyHub Admin Paneli</title>
+  <style>
+    :root {
+      --bg:#f6f0ff;
+      --card:#fff;
+      --text:#2c1b4d;
+      --muted:#7f67a6;
+      --line:#eadbf8;
+      --accent:linear-gradient(135deg,#7b4dff 0%,#d54fd6 100%);
+      --shadow:0 20px 48px rgba(102,72,153,.12);
+      --danger:#e11d48;
+      --success:#16a34a;
+      --warning:#d97706;
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);background:linear-gradient(180deg,#fcf9ff 0%,var(--bg) 100%)}
+    .hidden{display:none!important}
+    .shell{min-height:100vh;padding:24px}
+    .login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+    .login-card,.card{background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow)}
+    .login-card{width:min(430px,100%);padding:28px}
+    .brand{display:flex;gap:14px;align-items:center;margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:18px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:24px;box-shadow:0 12px 28px rgba(123,77,255,.28)}
+    h1,h2,h3,p{margin:0}
+    .muted{color:var(--muted)}
+    .input,select,textarea{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:16px;font:inherit;background:#fff}
+    textarea{min-height:90px;resize:vertical}
+    .stack{display:grid;gap:12px}
+    .btn{border:none;border-radius:16px;padding:13px 16px;font-weight:800;font-size:14px;cursor:pointer}
+    .btn-primary{background:var(--accent);color:#fff;box-shadow:0 12px 24px rgba(123,77,255,.22)}
+    .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text)}
+    .btn-danger{background:#fff1f2;color:var(--danger);border:1px solid #fecdd3}
+    .btn-success{background:#ecfdf3;color:var(--success);border:1px solid #bbf7d0}
+    .msg{min-height:20px;color:var(--danger);font-size:13px}
+    .topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:28px;padding:20px 22px;box-shadow:var(--shadow)}
+    .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .badge{padding:10px 14px;border-radius:14px;background:#f6efff;border:1px solid var(--line);font-weight:700}
+    .grid{display:grid;gap:18px}
+    .stats{grid-template-columns:repeat(6,minmax(0,1fr));margin-top:18px}
+    .stat{padding:18px}
+    .stat strong{display:block;font-size:28px;margin-top:8px}
+    .layout{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin-top:18px}
+    .section{padding:20px}
+    .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .list{display:grid;gap:12px}
+    .row{border:1px solid var(--line);border-radius:18px;padding:14px;background:#fff}
+    .row-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{padding:8px 10px;border-radius:999px;background:#f8f4ff;border:1px solid var(--line);font-size:12px;font-weight:700}
+    .chip.pending{background:#fff7ed;color:#b45309;border-color:#fed7aa}
+    .chip.approved{background:#ecfdf3;color:#15803d;border-color:#bbf7d0}
+    .chip.rejected{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+    .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .mini{font-size:12px;color:var(--muted)}
+    .table-list{display:grid;gap:10px;max-height:420px;overflow:auto;padding-right:4px}
+    .split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .notice{padding:12px 14px;border-radius:16px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:13px;margin-top:12px}
+    @media (max-width: 1180px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.layout,.split{grid-template-columns:1fr}}
+    @media (max-width: 760px){.shell{padding:14px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar{padding:16px}.row-top{flex-direction:column}.top-actions{width:100%}.badge{width:100%}.btn{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="login-wrap" id="loginView">
+    <div class="login-card">
+      <div class="brand">
+        <div class="logo">🛡️</div>
+        <div>
+          <h1>BeautyHub Admin</h1>
+          <p class="muted">Müşteri, partner ve randevu akışını tek yerden yönet.</p>
+        </div>
+      </div>
+      <form id="loginForm" class="stack">
+        <input class="input" id="emailInput" type="email" placeholder="Admin email" value="admin@beautyhub.local" />
+        <input class="input" id="passwordInput" type="password" placeholder="Şifre" value="123456" />
+        <button class="btn btn-primary" type="submit">Admin Girişi</button>
+        <div class="notice">Demo giriş hazır: <strong>admin@beautyhub.local</strong> / <strong>123456</strong></div>
+        <div class="msg" id="loginMsg"></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="shell hidden" id="appView">
+    <div class="topbar">
+      <div>
+        <h2>Yönetim Paneli</h2>
+        <p class="muted">Üç tarafı da buradan test edebilirsin: onay, görünürlük, plan ve randevu.</p>
+      </div>
+      <div class="top-actions">
+        <div class="badge" id="adminBadge">Admin</div>
+        <button class="btn btn-secondary" id="refreshBtn">Yenile</button>
+        <button class="btn btn-danger" id="logoutBtn">Çıkış</button>
+      </div>
+    </div>
+
+    <div class="grid stats" id="statGrid"></div>
+
+    <div class="layout">
+      <section class="card section">
+        <div class="section-head">
+          <div>
+            <h3>Partner Onay ve Görünürlük</h3>
+            <p class="muted">Onaylı + planı aktif mağazalar müşteri tarafında görünür.</p>
+          </div>
+        </div>
+        <div class="list" id="partnerList"></div>
+      </section>
+
+      <div class="grid">
+        <section class="card section">
+          <div class="section-head">
+            <div>
+              <h3>Randevular</h3>
+              <p class="muted">Partner ve müşteri tarafındaki akışın aynı kaydı.</p>
+            </div>
+          </div>
+          <div class="table-list" id="appointmentList"></div>
+        </section>
+
+        <section class="card section">
+          <div class="section-head">
+            <div>
+              <h3>Ödeme Geçmişi</h3>
+              <p class="muted">Plan ödemeleri burada görünür.</p>
+            </div>
+          </div>
+          <div class="table-list" id="paymentList"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="split" style="margin-top:18px">
+      <section class="card section">
+        <div class="section-head">
+          <div>
+            <h3>Müşteriler</h3>
+            <p class="muted">Kayıt olan müşteri numaraları.</p>
+          </div>
+        </div>
+        <div class="table-list" id="customerList"></div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <div>
+            <h3>Nasıl test edeceksin</h3>
+            <p class="muted">Üç panelin gerçekten bağlı olduğunu hızlıca doğrula.</p>
+          </div>
+        </div>
+        <div class="notice" style="background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6">
+          1) <strong>/partner</strong> tarafında yeni mağaza açarsan burada <strong>Bekliyor</strong> olarak düşer.<br>
+          2) Buradan <strong>Onayla</strong> dersen mağaza müşteri tarafında görünür.<br>
+          3) Buradan planı <strong>Günlük/Haftalık</strong> seçersen müşteri listesine çıkmaya devam eder.<br>
+          4) Müşteri randevu alınca hem partner panelde hem burada aynı kayıt görünür.
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const state = { user: null, data: null };
+
+    async function api(path, options = {}) {
+      const res = await fetch(path, {
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Bir hata oluştu.');
+      return data;
+    }
+
+    function statusChip(status) {
+      const label = status === 'approved' ? 'Onaylı' : status === 'pending' ? 'Bekliyor' : 'Reddedildi';
+      return `<span class="chip ${status}">${label}</span>`;
+    }
+
+    function renderStats(summary) {
+      const items = [
+        ['Müşteri', summary.customers],
+        ['Toplam Partner', summary.partners_total],
+        ['Onaylı Partner', summary.partners_approved],
+        ['Bekleyen Partner', summary.partners_pending],
+        ['Randevu', summary.appointments_total],
+        ['Ödeme Toplamı', `₺${summary.payments_total}`],
+      ];
+      $('#statGrid').innerHTML = items.map(([label, value]) => `
+        <article class="card stat">
+          <span class="muted">${label}</span>
+          <strong>${value}</strong>
+        </article>
+      `).join('');
+    }
+
+    function renderPartners(items) {
+      $('#partnerList').innerHTML = items.map(item => `
+        <article class="row">
+          <div class="row-top">
+            <div>
+              <h3>${item.business_name}</h3>
+              <div class="mini">${item.phone} • ${item.city} / ${item.district}</div>
+            </div>
+            ${statusChip(item.approval_status)}
+          </div>
+          <div class="chips">
+            <span class="chip">Plan: ${item.active_plan === 'daily' ? 'Günlük' : item.active_plan === 'weekly' ? 'Haftalık' : 'Yok'}</span>
+            <span class="chip">Bitiş: ${item.ends_at}</span>
+            <span class="chip">Puan: ${item.rating}</span>
+            <span class="chip">Market: ${item.visible_in_market ? 'Açık' : 'Kapalı'}</span>
+          </div>
+          ${item.note ? `<div class="notice">Not: ${item.note}</div>` : ''}
+          <div class="row-actions">
+            <button class="btn btn-success" data-approve="${item.id}">Onayla</button>
+            <button class="btn btn-secondary" data-pending="${item.id}">Beklet</button>
+            <button class="btn btn-danger" data-reject="${item.id}">Reddet</button>
+            <button class="btn btn-secondary" data-toggle-visible="${item.id}" data-visible="${item.visible_in_market}">${item.visible_in_market ? 'Marketi Kapat' : 'Marketi Aç'}</button>
+            <button class="btn btn-secondary" data-plan="${item.id}:daily">Günlük Plan</button>
+            <button class="btn btn-secondary" data-plan="${item.id}:weekly">Haftalık Plan</button>
+            <button class="btn btn-secondary" data-plan="${item.id}:none">Planı Kapat</button>
+          </div>
+        </article>
+      `).join('');
+
+      document.querySelectorAll('[data-approve]').forEach(btn => btn.onclick = () => updateApproval(btn.dataset.approve, 'approved'));
+      document.querySelectorAll('[data-pending]').forEach(btn => btn.onclick = () => updateApproval(btn.dataset.pending, 'pending'));
+      document.querySelectorAll('[data-reject]').forEach(btn => btn.onclick = () => updateApproval(btn.dataset.reject, 'rejected'));
+      document.querySelectorAll('[data-toggle-visible]').forEach(btn => btn.onclick = () => updateVisibility(btn.dataset.toggleVisible, btn.dataset.visible !== '1'));
+      document.querySelectorAll('[data-plan]').forEach(btn => btn.onclick = () => {
+        const [id, plan] = btn.dataset.plan.split(':');
+        updatePlan(id, plan);
+      });
+    }
+
+    function renderAppointments(items) {
+      $('#appointmentList').innerHTML = items.map(item => `
+        <article class="row">
+          <div class="row-top">
+            <div>
+              <strong>${item.partner_name}</strong>
+              <div class="mini">${item.customer_phone} • ${item.category}</div>
+            </div>
+            <span class="chip">${item.status}</span>
+          </div>
+          <div class="chips">
+            <span class="chip">${item.service_name}</span>
+            <span class="chip">${item.appointment_date}</span>
+            <span class="chip">${item.time_label}</span>
+            <span class="chip">₺${item.price}</span>
+          </div>
+          <div class="row-actions">
+            <button class="btn btn-success" data-appt="${item.id}:approved">Onayla</button>
+            <button class="btn btn-secondary" data-appt="${item.id}:pending">Beklet</button>
+            <button class="btn btn-danger" data-appt="${item.id}:rejected">Reddet</button>
+            <button class="btn btn-secondary" data-appt="${item.id}:cancelled">İptal Et</button>
+          </div>
+        </article>
+      `).join('');
+      document.querySelectorAll('[data-appt]').forEach(btn => btn.onclick = () => {
+        const [id, status] = btn.dataset.appt.split(':');
+        updateAppointmentStatus(id, status);
+      });
+    }
+
+    function renderPayments(items) {
+      $('#paymentList').innerHTML = items.length ? items.map(item => `
+        <article class="row">
+          <div class="row-top">
+            <div>
+              <strong>${item.business_name}</strong>
+              <div class="mini">${item.created_at}</div>
+            </div>
+            <span class="chip">₺${item.amount}</span>
+          </div>
+          <div class="chips">
+            <span class="chip">${item.plan_type === 'daily' ? 'Günlük' : 'Haftalık'}</span>
+            <span class="chip">${item.method}</span>
+            <span class="chip">**** ${item.card_last4 || '----'}</span>
+            <span class="chip">${item.status}</span>
+          </div>
+        </article>
+      `).join('') : '<div class="mini">Henüz ödeme yok.</div>';
+    }
+
+    function renderCustomers(items) {
+      $('#customerList').innerHTML = items.map(item => `
+        <article class="row">
+          <strong>${item.phone}</strong>
+          <div class="mini" style="margin-top:6px">Kayıt: ${item.created_at}</div>
+        </article>
+      `).join('');
+    }
+
+    async function loadBootstrap() {
+      const data = await api('/admin-api/bootstrap');
+      state.data = data;
+      renderStats(data.summary);
+      renderPartners(data.partners);
+      renderAppointments(data.appointments);
+      renderPayments(data.payments);
+      renderCustomers(data.customers);
+    }
+
+    async function refreshMe() {
+      const data = await api('/admin-api/me');
+      state.user = data.user;
+      if (state.user) {
+        $('#loginView').classList.add('hidden');
+        $('#appView').classList.remove('hidden');
+        $('#adminBadge').textContent = state.user.full_name;
+        await loadBootstrap();
+      } else {
+        $('#loginView').classList.remove('hidden');
+        $('#appView').classList.add('hidden');
+      }
+    }
+
+    async function updateApproval(id, status) {
+      const note = status === 'approved' ? 'Admin tarafından onaylandı.' : status === 'rejected' ? 'Admin tarafından reddedildi.' : 'Beklemeye alındı.';
+      await api(`/admin-api/partners/${id}/approval`, { method: 'POST', body: JSON.stringify({ approval_status: status, note }) });
+      await loadBootstrap();
+    }
+    async function updateVisibility(id, visible) {
+      await api(`/admin-api/partners/${id}/visibility`, { method: 'POST', body: JSON.stringify({ visible_in_market: visible }) });
+      await loadBootstrap();
+    }
+    async function updatePlan(id, plan) {
+      await api(`/admin-api/partners/${id}/plan`, { method: 'POST', body: JSON.stringify({ active_plan: plan }) });
+      await loadBootstrap();
+    }
+    async function updateAppointmentStatus(id, status) {
+      await api(`/admin-api/appointments/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) });
+      await loadBootstrap();
+    }
+
+    $('#loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('#loginMsg').textContent = '';
+      try {
+        await api('/admin-api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: $('#emailInput').value.trim(), password: $('#passwordInput').value.trim() })
+        });
+        await refreshMe();
+      } catch (err) {
+        $('#loginMsg').textContent = err.message;
+      }
+    });
+    $('#logoutBtn').onclick = async () => { await api('/admin-api/auth/logout', { method: 'POST', body: '{}' }); location.reload(); };
+    $('#refreshBtn').onclick = () => loadBootstrap();
+    refreshMe().catch(() => {});
+  </script>
+</body>
+</html>
