@@ -411,14 +411,6 @@ async function init() {
   document.querySelectorAll('.tab').forEach(btn => btn.onclick = () => setAuthMode(btn.dataset.tab));
   $('#authForm').addEventListener('submit', submitAuth);
   $('#appointmentForm').addEventListener('submit', submitAppointment);
-  $('#demoLoginBtn').onclick = async () => {
-    $('#phoneInput').value = '05001234567';
-    $('#passwordInput').value = '123456';
-    setAuthMode('login');
-    await api('/customer-api/login', { method: 'POST', body: JSON.stringify({ phone: '05001234567', password: '123456' }) });
-    await refreshMe();
-    closeModal('authModal');
-  };
 }
 
 init();
