@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 
+Disallow: /partner
 Disallow: /admin
 Disallow: /admin-panel
 
