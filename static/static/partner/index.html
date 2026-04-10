@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HazırımApp Partner Paneli</title>
+  <style>
+    :root {
+      --bg: #f7effb;
+      --panel: rgba(255,255,255,0.82);
+      --panel-strong: rgba(255,255,255,0.96);
+      --text: #331b57;
+      --muted: #7f67a6;
+      --line: #eadbf8;
+      --primary: linear-gradient(135deg, #7b4dff 0%, #d54fd6 100%);
+      --primary-solid: #8f52ff;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --shadow: 0 20px 50px rgba(110, 72, 170, 0.12);
+      --radius-xl: 26px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.95), transparent 30%),
+        linear-gradient(180deg, #fcf8ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 18px;
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(18px);
+      border-right: 1px solid rgba(234,219,248,0.9);
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 10px 20px;
+    }
+
+    .brand-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 20px;
+      background: var(--primary);
+      display: grid;
+      place-items: center;
+      color: #fff7ad;
+      font-size: 24px;
+      box-shadow: 0 14px 28px rgba(143, 82, 255, 0.25);
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .menu {
+      margin-top: 8px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .menu button {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      border-radius: 18px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .menu button:hover,
+    .menu button.active {
+      background: var(--panel-strong);
+      border-color: var(--line);
+      box-shadow: 0 10px 24px rgba(124, 85, 255, 0.08);
+    }
+
+    .menu .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 14px;
+      background: #f3ebff;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-card {
+      margin-top: 22px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .sidebar-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .mini-plan {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #faf6ff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      font-size: 13px;
+    }
+
+    .main {
+      padding: 26px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .topbar p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chip, .ghost-btn, .primary-btn, .outline-btn, .danger-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .chip {
+      background: #f5ecff;
+      color: var(--text);
+      cursor: default;
+    }
+
+    .ghost-btn,
+    .outline-btn {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 12px 26px rgba(143, 82, 255, 0.24);
+    }
+
+    .danger-btn {
+      background: #fff1f2;
+      color: var(--danger);
+      border: 1px solid #fecdd3;
+    }
+
+    .ghost-btn:hover,
+    .outline-btn:hover,
+    .primary-btn:hover,
+    .danger-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .stat-value {
+      margin-top: 12px;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .stat-sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .layout-2 {
+      display: grid;
+      grid-template-columns: 1.25fr .95fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .card-header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 14px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #c59bff;
+      box-shadow: 0 0 0 4px rgba(197, 155, 255, 0.16);
+    }
+
+    textarea {
+      min-height: 124px;
+      resize: vertical;
+    }
+
+    .full { grid-column: 1 / -1; }
+
+    .store-banner {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fff 0%, #faf5ff 100%);
+    }
+
+    .store-avatar {
+      width: 112px;
+      height: 112px;
+      border-radius: 26px;
+      background: var(--primary);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 42px;
+      font-weight: 800;
+      box-shadow: 0 18px 34px rgba(143,82,255,0.18);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: #f5ecff;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .muted { color: var(--muted); }
+    .success { color: var(--success); }
+    .warning { color: var(--warning); }
+    .danger { color: var(--danger); }
+
+    .service-list, .appt-list, .plan-list, .hours-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .service-item, .appt-item, .plan-item, .hour-item {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .service-item,
+    .appt-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .plan-item.active {
+      background: linear-gradient(180deg, #fff 0%, #faf3ff 100%);
+      border-color: #d8b8ff;
+    }
+
+    .plan-price {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 10px 0 6px;
+    }
+
+    .tiny {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .day-toggle {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .toggle {
+      width: 46px;
+      height: 28px;
+      background: #eadbf8;
+      border-radius: 999px;
+      position: relative;
+      transition: .2s ease;
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,.12);
+      transition: .2s ease;
+    }
+
+    .toggle.on {
+      background: linear-gradient(135deg, #7b4dff 0%, #d54fd6 100%);
+    }
+
+    .toggle.on::after {
+      left: 21px;
+    }
+
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .notice {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #f7f1ff;
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .settings-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .settings-item {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .mobile-top {
+      display: none;
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      backdrop-filter: blur(16px);
+      background: rgba(252,248,255,0.85);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mobile-top button {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    @media (max-width: 1100px) {
+      .stats, .layout-2, .split { grid-template-columns: 1fr; }
+      .card-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 920px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 280px;
+        transform: translateX(-100%);
+        transition: .25s ease;
+        z-index: 20;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-top { display: flex; justify-content: space-between; align-items: center; }
+      .main { padding: 16px; }
+      .topbar { border-radius: 20px; padding: 16px; }
+      .topbar h2 { font-size: 24px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: 1fr; }
+      .store-banner { grid-template-columns: 1fr; }
+      .store-avatar { width: 92px; height: 92px; font-size: 34px; }
+      .top-actions { width: 100%; }
+      .top-actions > * { flex: 1 1 auto; }
+    }
+  
+
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .payment-card {
+      display: grid;
+      gap: 16px;
+    }
+
+    .summary-box {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff 0%, #faf6ff 100%);
+      border-radius: 20px;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .summary-row strong { color: var(--text); }
+
+    .method-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .method-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .method-btn.active {
+      background: #f3ebff;
+      border-color: #c59bff;
+      box-shadow: 0 10px 20px rgba(143, 82, 255, 0.12);
+    }
+
+    .payment-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .payment-item {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: #fff;
+    }
+
+    .payment-item .tiny { margin-top: 4px; }
+
+    .success-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      background: #ecfdf3;
+      color: #166534;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .plan-action-btn { min-width: 160px; }
+
+    @media (max-width: 1100px) {
+      .plan-grid { grid-template-columns: 1fr; }
+    }
+
+  
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1.2fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.portfolio-upload-box {
+  border: 1px dashed #d9b9fb;
+  border-radius: 22px;
+  padding: 18px;
+  background: linear-gradient(180deg, #fff 0%, #faf4ff 100%);
+}
+
+.portfolio-preview {
+  margin-top: 14px;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #f7effb;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.portfolio-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.portfolio-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.portfolio-item {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.portfolio-item img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+  background: #f7effb;
+}
+
+.portfolio-copy {
+  padding: 12px 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.portfolio-copy strong {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.portfolio-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(248, 239, 251, 0.96);
+      backdrop-filter: blur(18px);
+      z-index: 60;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .auth-overlay.hidden { display: none; }
+
+    .auth-shell {
+      width: min(980px, 100%);
+      display: grid;
+      grid-template-columns: 1fr 460px;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .auth-intro, .auth-card {
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .auth-intro {
+      background: linear-gradient(180deg, #fff 0%, #faf4ff 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .auth-intro h2 { margin: 18px 0 10px; font-size: 42px; line-height: 1.04; }
+    .auth-intro p { color: var(--muted); font-size: 15px; line-height: 1.65; }
+    .auth-points { display: grid; gap: 12px; margin-top: 22px; }
+    .auth-point { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 18px; background: #fff; border: 1px solid var(--line); font-weight: 700; }
+
+    .auth-tabs { display: flex; gap: 10px; margin-bottom: 16px; }
+    .auth-tab {
+      flex: 1;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .auth-tab.active { background: #f3ebff; border-color: #c59bff; }
+    .auth-form { display: none; gap: 14px; }
+    .auth-form.active { display: grid; }
+    .auth-meta { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+    .link-btn { background: transparent; border: none; color: var(--primary-solid); font-weight: 800; cursor: pointer; padding: 0; }
+    .auth-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .plan-flyout {
+      position: fixed;
+      top: 92px;
+      right: 26px;
+      width: min(420px, calc(100vw - 32px));
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: 0 28px 60px rgba(88, 53, 140, 0.2);
+      padding: 18px;
+      z-index: 40;
+      display: none;
+      max-height: calc(100vh - 120px);
+      overflow: auto;
+    }
+    .plan-flyout.open { display: grid; gap: 14px; }
+    .quick-plan-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .quick-plan-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .quick-plan-card.active { border-color: #c59bff; background: #faf3ff; box-shadow: 0 10px 20px rgba(143,82,255,0.08); }
+    .quick-plan-card strong { display: block; }
+    .quick-plan-card span { font-size: 12px; color: var(--muted); display: block; margin-top: 6px; }
+    .quick-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .quick-row > * { flex: 1 1 140px; }
+    .top-plan-badge { min-width: 150px; text-align: center; }
+    .top-plan-tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .plan-quick-pill { border:none; border-radius:16px; padding:12px 14px; font-size:14px; font-weight:800; cursor:pointer; background:#f7f0ff; color:var(--text); border:1px solid var(--line); }
+    .plan-quick-pill.active { background: var(--primary); color:#fff; border-color:transparent; box-shadow: 0 12px 24px rgba(143,82,255,.18); }
+    .topbar-plan-box { display:flex; align-items:center; gap:10px; padding:8px; border:1px solid var(--line); border-radius:20px; background:#fffafc; flex-wrap:wrap; }
+    .sidebar-plan-note { display:none; }
+    .logout-btn { background:#fff; border:1px solid var(--line); color:var(--text); }
+
+    @media (max-width: 980px) {
+      .auth-shell { grid-template-columns: 1fr; }
+      .auth-intro h2 { font-size: 34px; }
+      .portfolio-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 920px) {
+      .plan-flyout { top: 72px; right: 12px; width: calc(100vw - 24px); }
+    }
+    @media (max-width: 640px) {
+  
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1.2fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.portfolio-upload-box {
+  border: 1px dashed #d9b9fb;
+  border-radius: 22px;
+  padding: 18px;
+  background: linear-gradient(180deg, #fff 0%, #faf4ff 100%);
+}
+
+.portfolio-preview {
+  margin-top: 14px;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #f7effb;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.portfolio-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.portfolio-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.portfolio-item {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.portfolio-item img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+  background: #f7effb;
+}
+
+.portfolio-copy {
+  padding: 12px 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.portfolio-copy strong {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.portfolio-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+    .auth-overlay { padding: 12px; }
+      .auth-intro, .auth-card { padding: 20px; }
+      .quick-plan-grid { grid-template-columns: 1fr; }
+    }
+
+
+    .hour-item.active { border-color:#c59bff; box-shadow:0 10px 20px rgba(143,82,255,.08); background:#faf4ff; }
+    .hour-slot-panel { margin-top:14px; border:1px solid var(--line); border-radius:20px; padding:16px; background:#fffafc; }
+    .hour-slot-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .hour-slot-btn { border:1px solid var(--line); background:#fff; color:var(--text); border-radius:14px; padding:12px 10px; font-weight:700; cursor:pointer; }
+    .hour-slot-btn.active { background:linear-gradient(135deg,#7b4dff,#d54fd6); color:#fff; border-color:transparent; box-shadow:0 10px 18px rgba(143,82,255,.18); }
+    .hour-slot-btn:hover { transform:translateY(-1px); }
+    @media (max-width: 920px){ .hour-slot-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width: 560px){ .hour-slot-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+  </style>
+</head>
+<body>
+
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-shell">
+      <div class="auth-intro">
+        <div>
+          <div class="brand-badge">✦</div>
+          <h2>Mağazanı aç, görünürlüğünü seç, ödemeni yap.</h2>
+          <p>Partner panele girmek için önce giriş yap veya kayıt ol. Kayıt sonrası mağaza bilgilerini doldurup günlük ya da haftalık planı üst köşeden hemen aktive edebilirsin.</p>
+          <div class="auth-points">
+            <div class="auth-point">🏪 Mağaza açma kaydı</div>
+            <div class="auth-point">⭐ Günlük / haftalık görünürlük</div>
+            <div class="auth-point">💳 Üst köşeden hızlı ödeme</div>
+          </div>
+        </div>
+      </div>
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-auth-tab="login">Giriş Yap</button>
+          <button class="auth-tab" data-auth-tab="register">Mağaza Aç</button>
+        </div>
+        <div class="auth-form active" id="loginForm">
+          <div>
+            <h3 style="margin:0 0 8px; font-size:28px;">Partner girişi</h3>
+            <p class="auth-meta">Kayıtlı mağaza numaran ve şifrenle giriş yap.</p>
+          </div>
+          <label>Telefon Numarası<input id="loginPhone" type="text" placeholder="05xx xxx xx xx" /></label>
+          <label>Şifre<input id="loginPassword" type="password" placeholder="Şifren" /></label>
+          <div class="auth-actions">
+            <button class="primary-btn" id="loginBtn" type="button">Giriş Yap</button>
+            <button class="link-btn" id="forgotBtn" type="button">Şifremi unuttum</button>
+          </div>
+        </div>
+        <div class="auth-form" id="registerForm">
+          <div>
+            <h3 style="margin:0 0 8px; font-size:28px;">Mağaza kaydı</h3>
+            <p class="auth-meta">Önce hesabını oluştur. Sonra panel içinde profil, hizmet ve görünürlük planını tamamla.</p>
+          </div>
+          <label>Mağaza Adı<input id="registerBusinessName" type="text" placeholder="Örn. Işıl Beauty Studio" /></label>
+          <label>Telefon Numarası<input id="registerPhone" type="text" placeholder="05xx xxx xx xx" /></label>
+          <label>Şifre<input id="registerPassword" type="password" placeholder="En az 4 karakter" /></label>
+          <div class="auth-actions">
+            <button class="primary-btn" id="registerBtn" type="button">Kayıt Ol ve Mağaza Aç</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plan-flyout" id="planFlyout">
+    <div class="card-header" style="margin-bottom:0;">
+      <div>
+        <h3 style="font-size:22px; margin:0;">Plan seç ve öde</h3>
+        <p style="margin:6px 0 0;">Üst köşeden günlük veya haftalık planı hemen aktifleştir.</p>
+      </div>
+      <button class="ghost-btn" id="closePlanFlyout" type="button">Kapat</button>
+    </div>
+    <div class="quick-plan-grid">
+      <button class="quick-plan-card" data-quick-plan="daily" type="button"><strong>Günlük • 150 TL</strong><span>1 gün görünürlük</span></button>
+      <button class="quick-plan-card" data-quick-plan="weekly" type="button"><strong>Haftalık • 910 TL</strong><span>7 gün görünürlük</span></button>
+    </div>
+    <div class="method-tabs">
+      <button class="method-btn active" data-method="card">Kart ile Öde</button>
+      <button class="method-btn" data-method="eft">EFT / Havale</button>
+      <button class="method-btn" data-method="link">Ödeme Linki</button>
+    </div>
+    <div class="card-grid" id="quickPaymentFields">
+      <label>Kart Üzerindeki İsim<input id="quickCardName" type="text" placeholder="Kart sahibinin adı" /></label>
+      <label>Kart Numarası<input id="quickCardNumber" type="text" placeholder="1111 2222 3333 4444" /></label>
+      <label>Son Kullanma<input id="quickCardExpiry" type="text" placeholder="12/28" /></label>
+      <label>CVV<input id="quickCardCvv" type="password" placeholder="123" /></label>
+    </div>
+    <div class="summary-box">
+      <div class="summary-row"><span>Seçilen plan</span><strong id="quickSelectedPlanName">Günlük Plan</strong></div>
+      <div class="summary-row"><span>Ödenecek tutar</span><strong id="quickSelectedPlanAmount">150 TL</strong></div>
+    </div>
+    <div class="notice" id="quickPaymentHint">Kart bilgilerini girip planı hemen aktif edebilirsin.</div>
+    <button class="primary-btn" id="quickActivateBtn" type="button">Ödemeyi Yap ve Planı Aktif Et</button>
+  </div>
+
+  <div class="mobile-top">
+    <button id="menuToggle">☰ Menü</button>
+    <strong>Partner Paneli</strong>
+  </div>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-badge">✦</div>
+        <div>
+          <h1>HazırımApp</h1>
+          <p>Partner Paneli</p>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <button class="active" data-target="dashboard"><span class="icon">🏠</span> Genel Bakış</button>
+        <button data-target="profile"><span class="icon">🏪</span> Mağaza Profili</button>
+        <button data-target="services"><span class="icon">💅</span> Hizmetler</button>
+        <button data-target="hours"><span class="icon">🕒</span> Çalışma Saatleri</button>
+        <button data-target="plans"><span class="icon">⭐</span> Görünürlük Planı</button>
+        <button data-target="appointments"><span class="icon">📅</span> Randevular</button>
+        <button data-target="settings"><span class="icon">⚙️</span> Ayarlar</button>
+      </nav>
+
+      <div class="sidebar-card sidebar-plan-note">
+        <h3>Plan Yönetimi</h3>
+        <p>Plan seçimi ve ödeme artık sağ üstte görünür.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2>Güzellik Merkezi Partner Paneli</h2>
+          <p>Mağazanı yönet, hizmetlerini ekle ve görünürlüğünü kontrol et.</p>
+        </div>
+        <div class="top-actions">
+          <div class="topbar-plan-box">
+            <div class="chip top-plan-badge" id="headerPlanBadge">Aktif plan: Seçilmedi</div>
+            <div class="top-plan-tools">
+              <button class="plan-quick-pill" id="topDailyBtn" data-top-plan="daily" type="button">Günlük • 150 TL</button>
+              <button class="plan-quick-pill" id="topWeeklyBtn" data-top-plan="weekly" type="button">Haftalık • 910 TL</button>
+              <button class="primary-btn" id="openPaymentFlyoutBtn" type="button">Planı Seç ve Öde</button>
+            </div>
+          </div>
+          <button class="outline-btn">Mağazayı Gör</button>
+          <button class="primary-btn" id="saveTopProfileBtn">Kaydet</button>
+          <button class="ghost-btn logout-btn" id="logoutBtn" type="button">Çıkış</button>
+        </div>
+      </header>
+
+      <section class="section active" id="dashboard">
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-label">Bugünkü Randevu</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">Yeni kayıtlar burada görünür</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Aktif Hizmet</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">Eklediğin hizmetler burada görünür</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Bu Hafta Görüntülenme</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">Görüntülenme verileri burada toplanır</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Plan Durumu</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">Plan seçildiğinde gün sayısı görünür</div>
+          </div>
+        </div>
+
+        <div class="layout-2">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Mağaza Özeti</h3>
+                <p>Müşterilerin göreceği temel bilgiler burada özetlenir.</p>
+              </div>
+              <button class="outline-btn">Düzenle</button>
+            </div>
+
+            <div class="store-banner">
+              <div class="store-avatar">SB</div>
+              <div>
+                <h3 style="margin:0 0 8px; font-size:26px;">Mağaza adın burada görünecek</h3>
+                <div class="row" style="margin-bottom:10px;">
+                  <span class="pill">Şehir / İlçe</span>
+                  <span class="pill">Puan bilgisi</span>
+                  <span class="pill">Onay durumu</span>
+                </div>
+                <p class="muted" style="margin:0; line-height:1.6;">Profilini doldurduğunda müşterilere görünecek kısa açıklama burada yer alır.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Yaklaşan Randevular</h3>
+                <p>Bugün ve yarın için hızlı özet.</p>
+              </div>
+            </div>
+            <div class="appt-list">
+              <div class="appt-item">
+                <div>
+                  <strong>Henüz yaklaşan randevu yok</strong>
+                  <div class="tiny">Yeni randevular burada listelenir.</div>
+                </div>
+                <span class="pill">Bekleniyor</span>
+              </div>
+              <div class="appt-item">
+                <div>
+                  <strong>Randevu geldiğinde saat burada görünür</strong>
+                  <div class="tiny">Müşteri bilgisi burada görünür.</div>
+                </div>
+                <span class="pill">Bekleniyor</span>
+              </div>
+              <div class="appt-item">
+                <div>
+                  <strong>Randevu detayları burada görünür</strong>
+                  <div class="tiny">Durum bilgisi burada güncellenir.</div>
+                </div>
+                <span class="pill">Bekleniyor</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="profile">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Mağaza Profili</h3>
+              <p>Partner mağazasının müşterilere görünecek ana bilgilerini doldur.</p>
+            </div>
+          </div>
+
+          <div class="card-grid">
+            <label>
+              İşletme Adı
+              <input type="text" value="" placeholder="İşletme adın" />
+            </label>
+            <label>
+              Telefon
+              <input type="text" value="" placeholder="05xx xxx xx xx" />
+            </label>
+            <label>
+              İl
+              <select id="profileCity">
+                <option>İstanbul</option>
+                <option>Ankara</option>
+                <option>İzmir</option>
+              </select>
+            </label>
+            <label>
+              İlçe
+              <select id="profileDistrict"></select>
+            </label>
+            <label class="full">
+              Adres
+              <input type="text" value="" placeholder="Açık adres" />
+            </label>
+            <label class="full">
+              Açıklama
+              <textarea placeholder="Mağazanı kısa ve net anlat"></textarea>
+            </label>
+          </div>
+
+          <div class="footer-actions">
+            <button class="outline-btn">Vazgeç</button>
+            <button class="primary-btn" id="saveProfileBtn">Profili Kaydet</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="services">
+        <div class="split">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Yeni Hizmet Ekle</h3>
+                <p>Fiyat ve süre belirleyerek müşterilere göster.</p>
+              </div>
+            </div>
+            <div class="card-grid">
+              <label>
+                Hizmet Adı
+                <select id="serviceName"></select>
+              </label>
+              <label>
+                Kategori
+                <select id="serviceCategory">
+                  <option value="kaşkirpik">Kaş & Kirpik</option>
+                  <option value="cilt">Cilt Bakımı</option>
+                  <option value="tırnak">Tırnak</option>
+                  <option value="saç">Saç</option>
+                </select>
+              </label>
+              <label>
+                Fiyat
+                <input id="servicePrice" type="number" placeholder="350" />
+              </label>
+              <label>
+                Süre (dakika)
+                <input id="serviceDuration" type="number" placeholder="45" />
+              </label>
+            </div>
+            <div class="footer-actions">
+              <button class="outline-btn">Temizle</button>
+              <button class="primary-btn" id="addServiceBtn">Hizmet Ekle</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Aktif Hizmetler</h3>
+                <p>Mağazanda görünen mevcut işlemler.</p>
+              </div>
+            </div>
+            <div class="service-list" id="serviceList">
+              <div class="service-item">
+                <div>
+                  <strong>Kaş Alımı</strong>
+                  <div class="tiny">Kaş & Kirpik • 30 dk</div>
+                </div>
+                <div class="row">
+                  <span class="pill">250 TL</span>
+                  <button class="danger-btn">Sil</button>
+                </div>
+              </div>
+              <div class="service-item">
+                <div>
+                  <strong>Kirpik Lifting</strong>
+                  <div class="tiny">Kaş & Kirpik • 60 dk</div>
+                </div>
+                <div class="row">
+                  <span class="pill">850 TL</span>
+                  <button class="danger-btn">Sil</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class="card" style="margin-top:18px;">
+        <div class="card-header">
+          <div>
+            <h3>El İşi Görselleri</h3>
+            <p>Müşteri panelinde görünen el işi fotoğraflarını buradan ekle. Telefonundan gerçek görsel seçebilirsin.</p>
+          </div>
+        </div>
+        <div class="portfolio-grid">
+          <div class="portfolio-upload-box">
+            <div class="card-grid">
+              <label>
+                Kategori
+                <select id="portfolioCategory"></select>
+              </label>
+              <label>
+                Görsel Başlığı
+                <input id="portfolioTitle" type="text" placeholder="Örn. Nude french set" />
+              </label>
+              <label class="full">
+                El işi resmi
+                <input id="portfolioImageInput" type="file" accept="image/*" />
+              </label>
+            </div>
+            <div class="portfolio-preview" id="portfolioPreview">Önizleme burada</div>
+            <div class="footer-actions" style="justify-content:flex-start; margin-top:14px;">
+              <button class="outline-btn" id="clearPortfolioBtn" type="button">Temizle</button>
+              <button class="primary-btn" id="addPortfolioBtn" type="button">Görseli Ekle</button>
+            </div>
+          </div>
+          <div>
+            <div class="tiny" style="margin-bottom:10px; font-size:13px;">Mağazanda görünen el işi görselleri</div>
+            <div class="portfolio-list" id="portfolioList"></div>
+          </div>
+        </div>
+      </div>
+      </section>
+
+      <section class="section" id="hours">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Takvimden Çalışma Günü Seç</h3>
+              <p>Müşteri panelindeki gibi önce tarihi seç, sonra o güne açık saatleri işaretle.</p>
+            </div>
+          </div>
+          <div class="card-grid" style="margin-bottom:16px;">
+            <label>
+              Tarih Seçimi
+              <input id="partnerScheduleDate" type="date" />
+            </label>
+            <label>
+              Gün
+              <input id="partnerScheduleDay" type="text" readonly placeholder="Tarih seç" />
+            </label>
+          </div>
+          <div class="hour-slot-panel">
+            <div class="row" style="justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+              <div>
+                <strong id="activeDayLabel">Tarih seç</strong>
+                <div class="tiny" id="scheduleHelperText">Seçtiğin tarih müşteri panelinde uygun saatler olarak görünür.</div>
+              </div>
+              <span class="pill" id="selectedSlotCount">0 saat</span>
+            </div>
+            <div class="hour-slot-grid" id="hourSlotGrid"></div>
+          </div>
+          <div class="footer-actions">
+            <button class="outline-btn" id="clearScheduleBtn" type="button">Seçimi Temizle</button>
+            <button class="primary-btn" id="saveScheduleBtn" type="button">Tarihi Kaydet</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="plans">
+        <div class="split">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Görünürlük Planları</h3>
+                <p>Mağazanın listelerde görünmesi için önce plan seç, sonra ödeme yapıp aktifleştir.</p>
+              </div>
+            </div>
+            <div class="plan-grid">
+              <div class="plan-item" data-plan-card="daily">
+                <strong>Günlük Plan</strong>
+                <div class="plan-price">150 TL</div>
+                <div class="tiny">1 gün görünürlük • deneme ve hızlı tanıtım için ideal</div>
+                <div class="notice" style="margin-top:14px;">Bugün aktif etmek için aşağıdan bu planı seç ve ödemeyi tamamla.</div>
+                <div class="footer-actions" style="justify-content:flex-start; margin-top:14px;">
+                  <button class="outline-btn plan-select-btn" data-plan="daily">Bu Planı Seç</button>
+                </div>
+              </div>
+              <div class="plan-item" data-plan-card="weekly">
+                <strong>Haftalık Plan</strong>
+                <div class="plan-price">910 TL</div>
+                <div class="tiny">7 gün görünürlük • daha avantajlı fiyat</div>
+                <div class="notice" style="margin-top:14px;">Daha uzun süre üstte görünmek isteyen mağazalar için önerilir.</div>
+                <div class="footer-actions" style="justify-content:flex-start; margin-top:14px;">
+                  <button class="outline-btn plan-select-btn" data-plan="weekly">Bu Planı Seç</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card payment-card">
+            <div class="card-header">
+              <div>
+                <h3>Ödeme ve Aktivasyon</h3>
+                <p>Buradan planı aktif edebilirsin. Ödeme tamamlanınca görünürlük hemen başlar.</p>
+              </div>
+            </div>
+            <div class="summary-box">
+              <div class="summary-row"><span>Seçilen plan</span><strong id="selectedPlanName">Haftalık Plan</strong></div>
+              <div class="summary-row"><span>Ödenecek tutar</span><strong id="selectedPlanAmount">910 TL</strong></div>
+              <div class="summary-row"><span>Aktif olacağı süre</span><strong id="selectedPlanDuration">7 gün</strong></div>
+            </div>
+
+            <div>
+              <div class="tiny" style="margin-bottom:10px; font-weight:800; color:var(--text);">Ödeme yöntemi</div>
+              <div class="method-tabs">
+                <button class="method-btn active" data-method="card">Kart ile Öde</button>
+                <button class="method-btn" data-method="eft">EFT / Havale</button>
+                <button class="method-btn" data-method="link">Ödeme Linki</button>
+              </div>
+            </div>
+
+            <div class="card-grid" id="paymentFields">
+              <label>
+                Kart Üzerindeki İsim
+                <input id="cardName" type="text" placeholder="Kart sahibinin adı" />
+              </label>
+              <label>
+                Kart Numarası
+                <input id="cardNumber" type="text" placeholder="1111 2222 3333 4444" />
+              </label>
+              <label>
+                Son Kullanma
+                <input id="cardExpiry" type="text" placeholder="12/28" />
+              </label>
+              <label>
+                CVV
+                <input id="cardCvv" type="password" placeholder="123" />
+              </label>
+            </div>
+
+            <div class="notice" id="paymentHint">Kart bilgilerini doldurup aşağıdaki butondan planı hemen aktif edebilirsin.</div>
+
+            <div class="footer-actions" style="justify-content:flex-start;">
+              <button class="primary-btn plan-action-btn" id="activatePlanBtn">Ödemeyi Yap ve Planı Aktif Et</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <div class="card-header">
+            <div>
+              <h3>Ödeme Geçmişi</h3>
+              <p>Hangi planın ne zaman aktive edildiğini buradan gör.</p>
+            </div>
+          </div>
+          <div class="payment-list" id="paymentList">
+            <div class="tiny">Henüz ödeme yok.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="appointments">
+        <div class="split">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Takvimden Randevu Oluştur</h3>
+                <p>Müşteri için tarih ve saat seçerek panelden direkt randevu ver.</p>
+              </div>
+            </div>
+            <div class="card-grid">
+              <label>
+                Müşteri Telefonu
+                <input id="manualCustomerPhone" type="text" placeholder="05xxxxxxxxx" />
+              </label>
+              <label>
+                Hizmet
+                <select id="manualServiceSelect"></select>
+              </label>
+              <label>
+                Tarih Seçimi
+                <input id="partnerApptDate" type="date" />
+              </label>
+              <label>
+                Saat Seçimi
+                <select id="partnerApptTime"></select>
+              </label>
+              <label style="grid-column:1 / -1;">
+                Not
+                <textarea id="manualApptNote" rows="3" placeholder="İstersen kısa not ekle"></textarea>
+              </label>
+            </div>
+            <div class="notice" id="manualApptHint">Önce çalışma saatlerinden gün ve saatlerini aktif et. Takvimde seçtiğin güne göre sadece açık saatler görünür.</div>
+            <div class="footer-actions" style="justify-content:flex-start;">
+              <button class="primary-btn" id="createManualApptBtn">Randevu Oluştur</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Randevu Yönetimi</h3>
+                <p>Yeni gelen rezervasyonları onayla veya reddet.</p>
+              </div>
+            </div>
+            <div class="appt-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="settings">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Panel Ayarları</h3>
+              <p>Hesap ve mağaza görünürlüğü ile ilgili temel ayarlar.</p>
+            </div>
+          </div>
+          <div class="settings-list">
+            <div class="settings-item">
+              <div>
+                <strong>Yeni randevularda e-posta bildirimi</strong>
+                <div class="tiny">Her yeni rezervasyonda bildirim al.</div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="settings-item">
+              <div>
+                <strong>Mağaza görünürlüğü aktif</strong>
+                <div class="tiny">Aktif plan süresince listelerde görün.</div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="settings-item">
+              <div>
+                <strong>Hesabı geçici gizle</strong>
+                <div class="tiny">İstersen mağazanı kısa süreliğine pasif yap.</div>
+              </div>
+              <button class="outline-btn">Gizle</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" style="position:fixed; right:20px; bottom:20px; background:#331b57; color:#fff; padding:12px 16px; border-radius:14px; box-shadow:0 12px 24px rgba(0,0,0,.14); opacity:0; pointer-events:none; transition:.2s; z-index:9999; font-weight:700;">Kaydedildi</div>
+<script>
+    const DAYS = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+    const AUTH_KEY = 'partnerPanelUser_v5';
+    const state = {
+      profile: null,
+      services: [],
+      hours: [],
+      appointments: [],
+      settings: {},
+      plan: {},
+      payments: [],
+      selectedPlan: 'weekly',
+      selectedPaymentMethod: 'card',
+      meta: null,
+      selectedServiceCategory: 'tırnak',
+      partnerUser: null,
+      dateSlotCache: {},
+      activeScheduleDate: '',
+      portfolio: [],
+      pendingPortfolioImage: ''
+    };
+
+    const CATEGORY_LABELS = {
+      'tırnak': 'Tırnak',
+      'saç': 'Saç',
+      'makyaj': 'Makyaj',
+      'kaşkirpik': 'Kaş & Kirpik',
+      'cilt': 'Cilt Bakımı',
+      'epilasyon': 'Lazer & Epilasyon'
+    };
+
+
+    const STATIC_SERVICE_MAP = {
+      'tırnak': ['Protez Tırnak','Kalıcı Oje','Jel Tırnak','Manikür','Pedikür','Nail Art'],
+      'saç': ['Saç Kesimi','Fön','Keratin Bakım','Ombre','Dip Boya','Topuz'],
+      'makyaj': ['Günlük Makyaj','Gece Makyajı','Gelin Makyajı','Nişan Makyajı','Profesyonel Makyaj'],
+      'kaşkirpik': ['Kaş Alımı','Yüz Alımı','Kaş Şekillendirme','Kaş Laminasyonu','Kirpik Lifting','İpek Kirpik'],
+      'cilt': ['Klasik Cilt Bakımı','Hydrafacial','Nem Bakımı','Yüz Temizleme','Anti-Aging Bakım'],
+      'epilasyon': ['Tüm Vücut Epilasyon','Bölgesel Epilasyon','Yüz Epilasyon','Kol Epilasyon','Bacak Epilasyon']
+    };
+
+    const navButtons = document.querySelectorAll('.menu button');
+    const sections = document.querySelectorAll('.section');
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const toastEl = document.getElementById('toast');
+    const addServiceBtn = document.getElementById('addServiceBtn');
+    const serviceList = document.getElementById('serviceList');
+    const manualServiceSelect = document.getElementById('manualServiceSelect');
+    const partnerApptDate = document.getElementById('partnerApptDate');
+    const partnerApptTime = document.getElementById('partnerApptTime');
+    const createManualApptBtn = document.getElementById('createManualApptBtn');
+    const portfolioList = document.getElementById('portfolioList');
+    const portfolioImageInput = document.getElementById('portfolioImageInput');
+    const portfolioPreview = document.getElementById('portfolioPreview');
+    
+    const authOverlay = document.getElementById('authOverlay');
+    const authTabs = document.querySelectorAll('.auth-tab');
+    const authForms = {
+      login: document.getElementById('loginForm'),
+      register: document.getElementById('registerForm')
+    };
+    const openPlanFlyoutBtn = document.getElementById('openPlanFlyoutBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const openPaymentFlyoutBtn = document.getElementById('openPaymentFlyoutBtn');
+    const closePlanFlyout = document.getElementById('closePlanFlyout');
+    const planFlyout = document.getElementById('planFlyout');
+    const WEEK_DAYS = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+
+    function todayIso() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function dayNameFromDate(value) {
+      if (!value) return '';
+      const date = new Date(value + 'T00:00:00');
+      if (Number.isNaN(date.getTime())) return '';
+      return WEEK_DAYS[(date.getDay() + 6) % 7];
+    }
+
+    function setAuthTab(tab) {
+      authTabs.forEach(btn => btn.classList.toggle('active', btn.dataset.authTab === tab));
+      Object.entries(authForms).forEach(([key, el]) => el.classList.toggle('active', key === tab));
+    }
+
+    authTabs.forEach(btn => btn.addEventListener('click', () => setAuthTab(btn.dataset.authTab)));
+
+    function openPlanFlyout() { planFlyout.classList.add('open'); }
+    function closePlanFlyoutPanel() { planFlyout.classList.remove('open'); }
+    openPlanFlyoutBtn?.addEventListener('click', openPlanFlyout);
+    openPaymentFlyoutBtn?.addEventListener('click', openPlanFlyout);
+    closePlanFlyout?.addEventListener('click', closePlanFlyoutPanel);
+
+    document.addEventListener('click', (e) => {
+      if (!planFlyout.classList.contains('open')) return;
+      if (planFlyout.contains(e.target) || openPlanFlyoutBtn.contains(e.target) || openPaymentFlyoutBtn.contains(e.target)) return;
+      closePlanFlyoutPanel();
+    });
+
+    function setLoggedInUser(user) {
+      state.partnerUser = user || null;
+      authOverlay.classList.add('hidden');
+      const profileTitle = document.querySelector('.topbar p');
+      if (profileTitle && user?.business_name) profileTitle.textContent = `${user.business_name} mağazasını yönet, hizmetlerini ekle ve görünürlüğünü kontrol et.`;
+    }
+
+    async function checkStoredLogin() {
+      try {
+        const me = await api('/api/me');
+        if (me?.user?.phone) {
+          setLoggedInUser(me.user);
+          return true;
+        }
+      } catch {}
+      state.partnerUser = null;
+      authOverlay.classList.remove('hidden');
+      return false;
+    }
+
+    document.getElementById('loginBtn')?.addEventListener('click', async () => {
+      const phone = document.getElementById('loginPhone').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      try {
+        const res = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ phone, password }) });
+        setLoggedInUser(res.user);
+        await loadMeta(true);
+        renderServiceSelectors();
+        await loadBootstrap();
+        showToast('Giriş başarılı');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    document.getElementById('registerBtn')?.addEventListener('click', async () => {
+      const business_name = document.getElementById('registerBusinessName').value.trim();
+      const phone = document.getElementById('registerPhone').value.trim();
+      const password = document.getElementById('registerPassword').value.trim();
+      try {
+        const res = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ business_name, phone, password }) });
+        setLoggedInUser(res.user);
+        await loadMeta(true);
+        renderServiceSelectors();
+        await loadBootstrap();
+        showToast('Mağaza kaydı oluşturuldu');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    document.getElementById('forgotBtn')?.addEventListener('click', async () => {
+      const phone = prompt('Kayıtlı telefon numaranı yaz');
+      if (!phone) return;
+      const newPassword = prompt('Yeni şifreni yaz');
+      if (!newPassword) return;
+      try {
+        await api('/api/auth/forgot', { method: 'POST', body: JSON.stringify({ phone, new_password: newPassword }) });
+        showToast('Şifre güncellendi');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    logoutBtn?.addEventListener('click', async () => {
+      try {
+        await api('/api/auth/logout', { method: 'POST', body: JSON.stringify({}) });
+      } catch {}
+      state.partnerUser = null;
+      state.profile = null;
+      state.services = [];
+      state.hours = [];
+      state.appointments = [];
+      state.dateSlotCache = {};
+      authOverlay.classList.remove('hidden');
+      setAuthTab('login');
+      showToast('Çıkış yapıldı');
+    });
+
+    const CITY_DISTRICTS = {
+      'İstanbul': ['Adalar','Arnavutköy','Ataşehir','Avcılar','Bağcılar','Bahçelievler','Bakırköy','Başakşehir','Bayrampaşa','Beşiktaş','Beykoz','Beylikdüzü','Beyoğlu','Büyükçekmece','Çatalca','Çekmeköy','Esenler','Esenyurt','Eyüpsultan','Fatih','Gaziosmanpaşa','Güngören','Kadıköy','Kağıthane','Kartal','Küçükçekmece','Maltepe','Pendik','Sancaktepe','Sarıyer','Silivri','Sultanbeyli','Sultangazi','Şile','Şişli','Tuzla','Ümraniye','Üsküdar','Zeytinburnu'],
+      'Ankara': ['Akyurt','Altındağ','Ayaş','Bala','Beypazarı','Çamlıdere','Çankaya','Çubuk','Elmadağ','Etimesgut','Evren','Gölbaşı','Güdül','Haymana','Kahramankazan','Kalecik','Keçiören','Kızılcahamam','Mamak','Nallıhan','Polatlı','Pursaklar','Sincan','Şereflikoçhisar','Yenimahalle'],
+      'İzmir': ['Aliağa','Balçova','Bayındır','Bayraklı','Bergama','Beydağ','Bornova','Buca','Çeşme','Çiğli','Dikili','Foça','Gaziemir','Güzelbahçe','Karabağlar','Karaburun','Karşıyaka','Kemalpaşa','Kınık','Kiraz','Konak','Menderes','Menemen','Narlıdere','Ödemiş','Seferihisar','Selçuk','Tire','Torbalı','Urla']
+    };
+
+    function populateDistricts(city, selectedDistrict = '') {
+      const districtSelect = document.getElementById('profileDistrict');
+      if (!districtSelect) return;
+      const districts = CITY_DISTRICTS[city] || [];
+      districtSelect.innerHTML = districts.map(d => `<option value="${d}">${d}</option>`).join('');
+      districtSelect.value = districts.includes(selectedDistrict) ? selectedDistrict : (districts[0] || '');
+    }
+
+    function showToast(message, isError = false) {
+      toastEl.textContent = message;
+      toastEl.style.background = isError ? '#dc2626' : '#331b57';
+      toastEl.style.opacity = '1';
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toastEl.style.opacity = '0', 1800);
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Bir hata oluştu.');
+      return data;
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        navButtons.forEach(b => b.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.target).classList.add('active');
+        if (window.innerWidth <= 920) sidebar.classList.remove('open');
+      });
+    });
+
+    menuToggle?.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+    function getProfileFormFields() {
+      const fields = document.querySelectorAll('#profile .card-grid input, #profile .card-grid select, #profile .card-grid textarea');
+      return {
+        businessName: fields[0],
+        phone: fields[1],
+        city: fields[2],
+        district: fields[3],
+        address: fields[4],
+        description: fields[5],
+      };
+    }
+
+    async function loadMeta(force = false) {
+      if (state.meta && !force) return state.meta;
+      const data = await api('/api/meta');
+      state.meta = data || { serviceMap: {} };
+      return state.meta;
+    }
+
+    function renderServiceSelectors() {
+      const categorySelect = document.getElementById('serviceCategory');
+      const serviceSelect = document.getElementById('serviceName');
+      const dynamicServiceMap = state.meta?.serviceMap || {};
+      const serviceMap = { ...STATIC_SERVICE_MAP, ...dynamicServiceMap };
+      if (!categorySelect || !serviceSelect) return;
+      categorySelect.innerHTML = Object.keys(CATEGORY_LABELS).map(key => `<option value="${key}">${CATEGORY_LABELS[key]}</option>`).join('');
+      if (!serviceMap[state.selectedServiceCategory]) state.selectedServiceCategory = 'tırnak';
+      categorySelect.value = state.selectedServiceCategory;
+      const names = (serviceMap[state.selectedServiceCategory] || []).filter(Boolean);
+      serviceSelect.innerHTML = names.length ? names.map(name => `<option value="${name}">${name}</option>`).join('') : '<option value="">Kategori için hizmet bulunamadı</option>';
+      if (names.length) serviceSelect.value = names[0];
+    }
+
+    function updateServiceOptions(category) {
+      state.selectedServiceCategory = category;
+      const serviceSelect = document.getElementById('serviceName');
+      const serviceMap = { ...STATIC_SERVICE_MAP, ...(state.meta?.serviceMap || {}) };
+      const names = (serviceMap[category] || []).filter(Boolean);
+      serviceSelect.innerHTML = names.length ? names.map(name => `<option value="${name}">${name}</option>`).join('') : '<option value="">Kategori için hizmet bulunamadı</option>';
+      if (names.length) serviceSelect.value = names[0];
+    }
+
+
+
+function renderPortfolioCategoryOptions() {
+  const select = document.getElementById('portfolioCategory');
+  if (!select) return;
+  select.innerHTML = Object.keys(CATEGORY_LABELS).map(key => `<option value="${key}">${CATEGORY_LABELS[key]}</option>`).join('');
+  if (!select.value) select.value = 'tırnak';
+}
+
+function renderPortfolio() {
+  if (!portfolioList) return;
+  const items = state.portfolio || [];
+  if (!items.length) {
+    portfolioList.innerHTML = '<div class="tiny">Henüz el işi görseli yok.</div>';
+    return;
+  }
+  portfolioList.innerHTML = items.map(item => `
+    <article class="portfolio-item" data-id="${item.id || ''}">
+      <img src="${item.image_data}" alt="${item.title}" />
+      <div class="portfolio-copy">
+        <strong>${item.title}</strong>
+        <div class="portfolio-meta">
+          <span class="pill">${CATEGORY_LABELS[item.category] || item.category}</span>
+          ${item.id ? '<button class="danger-btn portfolio-delete-btn">Sil</button>' : ''}
+        </div>
+      </div>
+    </article>
+  `).join('');
+  portfolioList.querySelectorAll('.portfolio-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = e.target.closest('.portfolio-item').dataset.id;
+      if (!id) return;
+      try {
+        await api(`/api/portfolio/${id}`, { method: 'DELETE' });
+        await loadBootstrap();
+        showToast('Görsel silindi');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+  });
+}
+
+function updatePortfolioPreview(src = '', title = '') {
+  state.pendingPortfolioImage = src || '';
+  if (!portfolioPreview) return;
+  portfolioPreview.innerHTML = src
+    ? `<img src="${src}" alt="${title || 'Önizleme'}" />`
+    : 'Önizleme burada';
+}
+
+    async function loadDateSlots(slotDate) {
+      if (!slotDate) return [];
+      const data = await api(`/api/date-slots?date=${encodeURIComponent(slotDate)}`);
+      state.dateSlotCache[slotDate] = Array.isArray(data.slots) ? data.slots : [];
+      if (partnerScheduleDay) partnerScheduleDay.value = data.day_name || dayNameFromDate(slotDate);
+      return state.dateSlotCache[slotDate];
+    }
+
+    async function saveDateSlots(slotDate, slots) {
+      await api('/api/date-slots', {
+        method: 'POST',
+        body: JSON.stringify({ slot_date: slotDate, slots })
+      });
+      state.dateSlotCache[slotDate] = slots;
+    }
+
+
+    function renderManualServiceOptions() {
+      if (!manualServiceSelect) return;
+      const names = (state.services || []).map(service => service.name).filter(Boolean);
+      manualServiceSelect.innerHTML = names.length ? names.map(name => `<option value="${name}">${name}</option>`).join('') : '<option value="">Önce hizmet ekle</option>';
+    }
+
+    async function renderPartnerAppointmentTimes(selectedDate = partnerApptDate?.value || todayIso()) {
+      if (!partnerApptDate || !partnerApptTime) return;
+      partnerApptDate.min = todayIso();
+      if (!partnerApptDate.value) partnerApptDate.value = selectedDate || todayIso();
+      const slotDate = partnerApptDate.value || selectedDate || todayIso();
+      const dayName = dayNameFromDate(slotDate);
+      const slots = await loadDateSlots(slotDate);
+      partnerApptTime.innerHTML = slots.length ? slots.map(slot => `<option value="${slot}">${slot}</option>`).join('') : '<option value="">Bu gün için saat yok</option>';
+      const hint = document.getElementById('manualApptHint');
+      if (hint) {
+        hint.textContent = slots.length
+          ? `${dayName} günü için ${slots.length} aktif saat var. Müşteri randevusu bu saatlerden birine kaydolur.`
+          : `${dayName || 'Seçili gün'} için aktif saat yok. Önce takvimden bu güne uygun saatleri aç.`;
+      }
+    }
+
+    function renderProfile() {
+      if (!state.profile) return;
+      const fields = getProfileFormFields();
+      fields.businessName.value = state.profile.business_name || '';
+      fields.phone.value = state.profile.phone || '';
+      fields.city.value = state.profile.city || 'İstanbul';
+      populateDistricts(fields.city.value, state.profile.district || 'Beşiktaş');
+      fields.address.value = state.profile.address || '';
+      fields.description.value = state.profile.description || '';
+
+      const summaryName = document.querySelector('.store-banner h3');
+      const summaryPills = document.querySelectorAll('.store-banner .pill');
+      const summaryText = document.querySelector('.store-banner .muted');
+      summaryName.textContent = state.profile.business_name || 'Partner Mağaza';
+      if (summaryPills[0]) summaryPills[0].textContent = `${state.profile.city} / ${state.profile.district}`;
+      if (summaryText) summaryText.textContent = state.profile.description || '';
+      const avatar = document.querySelector('.store-avatar');
+      if (avatar) {
+        const initials = (state.profile.business_name || 'PM').split(' ').slice(0,2).map(v => v[0] || '').join('').toUpperCase();
+        avatar.textContent = initials;
+      }
+    }
+
+    function serviceItemHtml(service) {
+      return `
+        <div class="service-item" data-id="${service.id}">
+          <div>
+            <strong>${service.name}</strong>
+            <div class="tiny">${CATEGORY_LABELS[service.category] || service.category} • ${service.duration} dk</div>
+          </div>
+          <div class="row">
+            <span class="pill">${service.price} TL</span>
+            <button class="danger-btn">Sil</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderServices() {
+      serviceList.innerHTML = state.services.map(serviceItemHtml).join('') || '<div class="tiny">Henüz hizmet yok.</div>';
+      serviceList.querySelectorAll('.danger-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.target.closest('.service-item').dataset.id;
+          try {
+            await api(`/api/services/${id}`, { method: 'DELETE' });
+            await loadMeta(true);
+            renderServiceSelectors();
+            await loadBootstrap();
+            showToast('Hizmet silindi');
+          } catch (err) {
+            showToast(err.message, true);
+          }
+        });
+      });
+
+      const statCards = document.querySelectorAll('.stat-card');
+      if (statCards[1]) {
+        statCards[1].querySelector('.stat-value').textContent = String(state.services.length);
+        statCards[1].querySelector('.stat-sub').textContent = state.services.slice(0,3).map(s => CATEGORY_LABELS[s.category] || s.category).filter((v,i,a)=>a.indexOf(v)===i).join(', ') || 'Henüz hizmet yok';
+      }
+    }
+
+    async function renderHours(selectedDate = state.activeScheduleDate || partnerScheduleDate?.value || todayIso()) {
+      const slotDate = selectedDate || todayIso();
+      state.activeScheduleDate = slotDate;
+      if (partnerScheduleDate) {
+        partnerScheduleDate.min = todayIso();
+        partnerScheduleDate.value = slotDate;
+      }
+      const dayName = dayNameFromDate(slotDate);
+      if (partnerScheduleDay) partnerScheduleDay.value = dayName;
+      const slots = await loadDateSlots(slotDate);
+      const activeDayLabel = document.getElementById('activeDayLabel');
+      const helperText = document.getElementById('scheduleHelperText');
+      const selectedSlotCount = document.getElementById('selectedSlotCount');
+      const slotGrid = document.getElementById('hourSlotGrid');
+      if (activeDayLabel) activeDayLabel.textContent = `${slotDate} • ${dayName}`;
+      if (helperText) helperText.textContent = slots.length
+        ? `${dayName} için ${slots.length} saat açık. Müşteri aynı günü seçince bu saatleri görür.`
+        : `${dayName} için henüz açık saat yok. Aşağıdan saat seçip kaydet.`;
+      if (selectedSlotCount) selectedSlotCount.textContent = slots.length ? `${slots.length} saat seçili` : 'Seçim yok';
+      const allSlots = ['10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+      if (slotGrid) {
+        slotGrid.innerHTML = allSlots.map(slot => `<button type="button" class="hour-slot-btn ${slots.includes(slot) ? 'active' : ''}" data-slot="${slot}">${slot}</button>`).join('');
+        slotGrid.querySelectorAll('.hour-slot-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const slot = btn.dataset.slot;
+            const nextSlots = [...slots];
+            const idx = nextSlots.indexOf(slot);
+            if (idx >= 0) nextSlots.splice(idx, 1); else nextSlots.push(slot);
+            nextSlots.sort();
+            try {
+              await saveDateSlots(slotDate, nextSlots);
+              await renderHours(slotDate);
+              await renderPartnerAppointmentTimes(slotDate);
+              showToast('Tarih saatleri güncellendi');
+            } catch (err) {
+              showToast(err.message, true);
+            }
+          });
+        });
+      }
+    }
+
+    function formatPaymentMethod(method) {
+      if (method === 'card') return 'Kart';
+      if (method === 'eft') return 'EFT / Havale';
+      if (method === 'link') return 'Ödeme Linki';
+      return method || '-';
+    }
+
+    function renderPlans() {
+      const activePlanName = state.plan.active_plan === 'daily' ? 'Günlük Plan' : state.plan.active_plan === 'weekly' ? 'Haftalık Plan' : 'Plan Seçilmedi';
+      const activeAmount = state.plan.active_plan === 'daily' ? state.plan.daily_price : state.plan.active_plan === 'weekly' ? state.plan.weekly_price : 0;
+      const activeDuration = state.plan.active_plan === 'daily' ? '1 gün' : state.plan.active_plan === 'weekly' ? '7 gün' : '-';
+      const miniPlan = document.querySelector('.mini-plan strong');
+      const miniPlanPrice = document.querySelector('.mini-plan span');
+      const sidebarText = document.querySelector('.sidebar-card p');
+      const statCards = document.querySelectorAll('.stat-card');
+      if (miniPlan) miniPlan.textContent = activePlanName;
+      if (miniPlanPrice) miniPlanPrice.textContent = `${activeAmount} TL`;
+      if (sidebarText) sidebarText.textContent = `${activePlanName}. Sağ üstten günlük veya haftalık plan seçip ödeme yapabilirsin.`;
+      if (statCards[3]) {
+        statCards[3].querySelector('.stat-value').textContent = String(state.plan.days_left || 0);
+        statCards[3].querySelector('.stat-sub').textContent = `${activePlanName} • ${state.plan.ends_at || '-'} bitiş`;
+      }
+
+      const selectedPlan = state.selectedPlan || state.plan.active_plan || 'weekly';
+      document.querySelectorAll('[data-plan-card]').forEach(card => {
+        const planKey = card.dataset.planCard;
+        card.classList.toggle('active', planKey === selectedPlan || planKey === state.plan.active_plan);
+        const btn = card.querySelector('.plan-select-btn');
+        if (btn) btn.textContent = selectedPlan === planKey ? 'Seçildi' : 'Bu Planı Seç';
+      });
+
+      const selectedName = selectedPlan === 'daily' ? 'Günlük Plan' : 'Haftalık Plan';
+      const selectedAmount = selectedPlan === 'daily' ? state.plan.daily_price : state.plan.weekly_price;
+      const selectedDuration = selectedPlan === 'daily' ? '1 gün' : '7 gün';
+      const headerPlanBadge = document.getElementById('headerPlanBadge');
+      if (headerPlanBadge) headerPlanBadge.textContent = activePlanName === 'Plan Seçilmedi' ? 'Aktif plan: Seçilmedi' : `Aktif plan: ${activePlanName}`;
+      const topDailyBtn = document.getElementById('topDailyBtn');
+      const topWeeklyBtn = document.getElementById('topWeeklyBtn');
+      if (topDailyBtn) topDailyBtn.classList.toggle('active', selectedPlan === 'daily');
+      if (topWeeklyBtn) topWeeklyBtn.classList.toggle('active', selectedPlan === 'weekly');
+      document.querySelectorAll('[data-quick-plan]').forEach(card => {
+        card.classList.toggle('active', card.dataset.quickPlan === selectedPlan);
+      });
+      const quickName = document.getElementById('quickSelectedPlanName');
+      const quickAmount = document.getElementById('quickSelectedPlanAmount');
+      if (quickName) quickName.textContent = selectedName;
+      if (quickAmount) quickAmount.textContent = `${selectedAmount} TL`;
+      const planNameEl = document.getElementById('selectedPlanName');
+      const planAmountEl = document.getElementById('selectedPlanAmount');
+      const planDurationEl = document.getElementById('selectedPlanDuration');
+      if (planNameEl) planNameEl.textContent = selectedName;
+      if (planAmountEl) planAmountEl.textContent = `${selectedAmount} TL`;
+      if (planDurationEl) planDurationEl.textContent = selectedDuration;
+
+      const paymentHint = document.getElementById('paymentHint');
+      if (paymentHint) {
+        const methodLabel = formatPaymentMethod(state.selectedPaymentMethod);
+        if (state.selectedPaymentMethod === 'card') {
+          paymentHint.textContent = `${selectedName} seçildi. Kart bilgilerini girip planı hemen aktif edebilirsin.`;
+        } else if (state.selectedPaymentMethod === 'eft') {
+          paymentHint.textContent = `${selectedName} seçildi. EFT/Havale ile ödeme kaydı oluşturulur ve plan aktif edilir.`;
+        } else {
+          paymentHint.textContent = `${selectedName} seçildi. Ödeme linki seçildiğinde ödeme tamamlanır ve plan aktif edilir.`;
+        }
+      }
+
+      document.querySelectorAll('.method-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.method === state.selectedPaymentMethod);
+      });
+
+      const paymentFields = document.getElementById('paymentFields');
+      if (paymentFields) {
+        paymentFields.style.display = state.selectedPaymentMethod === 'card' ? 'grid' : 'none';
+      }
+      const quickFields = document.getElementById('quickPaymentFields');
+      if (quickFields) quickFields.style.display = state.selectedPaymentMethod === 'card' ? 'grid' : 'none';
+      const quickHint = document.getElementById('quickPaymentHint');
+      if (quickHint) quickHint.textContent = paymentHint ? paymentHint.textContent : '';
+    }
+
+    function renderPaymentHistory() {
+      const list = document.getElementById('paymentList');
+      if (!list) return;
+      if (!state.payments.length) {
+        list.innerHTML = '<div class="tiny">Henüz ödeme yok.</div>';
+        return;
+      }
+      list.innerHTML = state.payments.map(item => `
+        <div class="payment-item">
+          <div>
+            <strong>${item.plan_type === 'daily' ? 'Günlük Plan' : 'Haftalık Plan'}</strong>
+            <div class="tiny">${item.created_at} • ${formatPaymentMethod(item.method)}${item.card_last4 ? ` • **** ${item.card_last4}` : ''}</div>
+          </div>
+          <div class="row">
+            <span class="success-pill">Ödendi</span>
+            <span class="pill">${item.amount} TL</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function appointmentStatusPill(status) {
+      const labelMap = { pending: 'Yeni', approved: 'Onaylandı', rejected: 'Reddedildi' };
+      return `<span class="pill">${labelMap[status] || status}</span>`;
+    }
+
+    function renderAppointments() {
+      const upcomingList = document.querySelector('#dashboard .layout-2 .card:last-child .appt-list');
+      const managementList = document.querySelector('#appointments .appt-list');
+      const todayCount = state.appointments.filter(a => a.date_label === 'Bugün').length;
+      const pendingCount = state.appointments.filter(a => a.status === 'pending').length;
+      const statCards = document.querySelectorAll('.stat-card');
+      if (statCards[0]) {
+        statCards[0].querySelector('.stat-value').textContent = String(todayCount);
+        statCards[0].querySelector('.stat-sub').textContent = `${pendingCount} yeni onay bekliyor`;
+      }
+      if (upcomingList) {
+        upcomingList.innerHTML = state.appointments.slice(0,3).map(appt => `
+          <div class="appt-item">
+            <div>
+              <strong>${appt.time_label} • ${appt.service_name}</strong>
+              <div class="tiny">Müşteri: ${appt.customer_name}</div>
+            </div>
+            ${appointmentStatusPill(appt.status)}
+          </div>
+        `).join('');
+      }
+      if (managementList) {
+        managementList.innerHTML = state.appointments.map(appt => `
+          <div class="appt-item" data-id="${appt.id}">
+            <div>
+              <strong>${appt.customer_name} • ${appt.service_name}</strong>
+              <div class="tiny">${appt.date_label} • ${appt.time_label} • ${appt.price} TL • ${appt.status === 'pending' ? 'Yeni' : appt.status === 'approved' ? 'Onaylandı' : 'Reddedildi'}</div>
+            </div>
+            <div class="row">
+              <button class="outline-btn detail-btn">Detay</button>
+              <button class="danger-btn reject-btn">Reddet</button>
+              <button class="primary-btn approve-btn">Onayla</button>
+            </div>
+          </div>
+        `).join('');
+        managementList.querySelectorAll('.approve-btn').forEach(btn => btn.addEventListener('click', (e) => updateAppointmentStatus(e, 'approved')));
+        managementList.querySelectorAll('.reject-btn').forEach(btn => btn.addEventListener('click', (e) => updateAppointmentStatus(e, 'rejected')));
+        managementList.querySelectorAll('.detail-btn').forEach(btn => btn.addEventListener('click', (e) => {
+          const id = e.target.closest('.appt-item').dataset.id;
+          const appt = state.appointments.find(a => String(a.id) === String(id));
+          if (appt) alert(`${appt.customer_name}
+${appt.service_name}
+${appt.date_label} ${appt.time_label}
+${appt.price} TL
+Durum: ${appt.status}`);
+        }));
+      }
+    }
+
+    async function updateAppointmentStatus(e, status) {
+      const id = e.target.closest('.appt-item').dataset.id;
+      try {
+        await api(`/api/appointments/${id}/status`, {
+          method: 'POST',
+          body: JSON.stringify({ status })
+        });
+        await loadBootstrap();
+        showToast(status === 'approved' ? 'Randevu onaylandı' : 'Randevu reddedildi');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function renderSettings() {
+      const toggles = document.querySelectorAll('#settings .settings-item .toggle');
+      toggles[0]?.classList.toggle('on', !!state.settings.email_notifications);
+      toggles[1]?.classList.toggle('on', !!state.settings.message_notifications);
+    }
+
+    async function loadBootstrap() {
+      const data = await api('/api/bootstrap');
+      state.profile = data.profile;
+      state.services = data.services;
+      state.hours = (data.hours || []).map(h => ({ ...h, slot_times: Array.isArray(h.slot_times) ? h.slot_times : (() => { try { return JSON.parse(h.slot_times || '[]'); } catch { return []; } })() }));
+      state.appointments = data.appointments;
+      state.settings = data.settings;
+      state.plan = data.plan;
+      state.payments = data.payments || [];
+      state.portfolio = (data.portfolio || []).map(item => ({ ...item, image_data: item.image_data || '' }));
+      if (!state.selectedPlan || state.selectedPlan === 'none') state.selectedPlan = (state.plan.active_plan && state.plan.active_plan !== 'none') ? state.plan.active_plan : 'daily';
+      if (!state.activeHourDay || !state.hours.find(h => h.day_name === state.activeHourDay)) state.activeHourDay = (state.hours[0]?.day_name || 'Pazartesi');
+      renderProfile();
+      renderServices();
+      renderManualServiceOptions();
+      renderPortfolioCategoryOptions();
+      renderPortfolio();
+      await renderHours(state.activeScheduleDate || todayIso());
+      renderAppointments();
+      renderSettings();
+      renderPlans();
+      renderPaymentHistory();
+    }
+
+    addServiceBtn?.addEventListener('click', async () => {
+      const serviceNameEl = document.getElementById('serviceName');
+      const name = serviceNameEl.value || serviceNameEl.selectedOptions?.[0]?.textContent || '';
+      const category = document.getElementById('serviceCategory').value;
+      const price = document.getElementById('servicePrice').value.trim();
+      const duration = document.getElementById('serviceDuration').value.trim();
+      if (!name || !price || !duration) {
+        showToast('Lütfen hizmet adı, fiyat ve süreyi doldur.', true);
+        return;
+      }
+      try {
+        await api('/api/services', {
+          method: 'POST',
+          body: JSON.stringify({ name, name_text: name, category, price, duration })
+        });
+        document.getElementById('servicePrice').value = '';
+        document.getElementById('serviceDuration').value = '';
+        await loadMeta(true);
+        renderServiceSelectors();
+        await loadBootstrap();
+        showToast('Hizmet eklendi');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    document.querySelector('#services .outline-btn')?.addEventListener('click', () => {
+      document.getElementById('servicePrice').value = '';
+      document.getElementById('serviceDuration').value = '';
+    });
+
+    document.querySelectorAll('#settings .settings-item .toggle').forEach((toggle, idx) => {
+      toggle.addEventListener('click', async () => {
+        const key = idx === 0 ? 'email_notifications' : 'message_notifications';
+        const next = !toggle.classList.contains('on');
+        try {
+          await api('/api/settings', { method: 'POST', body: JSON.stringify({ [key]: next }) });
+          await loadBootstrap();
+          showToast('Ayar güncellendi');
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+    });
+
+    document.getElementById('saveScheduleBtn')?.addEventListener('click', async () => {
+      const slotDate = partnerScheduleDate?.value || todayIso();
+      const slots = state.dateSlotCache[slotDate] || [];
+      try {
+        await saveDateSlots(slotDate, slots);
+        showToast('Takvim kaydedildi');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    document.getElementById('clearScheduleBtn')?.addEventListener('click', async () => {
+      const slotDate = partnerScheduleDate?.value || todayIso();
+      try {
+        await saveDateSlots(slotDate, []);
+        await renderHours(slotDate);
+        await renderPartnerAppointmentTimes(slotDate);
+        showToast('Seçili tarihin saatleri temizlendi');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+
+    const profileSaveButtons = [
+      document.getElementById('saveProfileBtn'),
+      document.getElementById('saveTopProfileBtn')
+    ].filter(Boolean);
+
+    async function saveProfile() {
+      const f = getProfileFormFields();
+      const payload = {
+        business_name: f.businessName.value.trim(),
+        phone: f.phone.value.trim(),
+        city: f.city.value,
+        district: f.district.value,
+        address: f.address.value.trim(),
+        description: f.description.value.trim(),
+      };
+      try {
+        await api('/api/profile', { method: 'POST', body: JSON.stringify(payload) });
+        await loadBootstrap();
+        showToast('Profil kaydedildi');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    profileSaveButtons.forEach(btn => btn.addEventListener('click', saveProfile));
+
+
+portfolioImageInput?.addEventListener('change', () => {
+  const file = portfolioImageInput.files?.[0];
+  if (!file) {
+    updatePortfolioPreview('');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => updatePortfolioPreview(String(reader.result || ''), document.getElementById('portfolioTitle')?.value || file.name);
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('clearPortfolioBtn')?.addEventListener('click', () => {
+  if (portfolioImageInput) portfolioImageInput.value = '';
+  document.getElementById('portfolioTitle').value = '';
+  updatePortfolioPreview('');
+});
+
+document.getElementById('addPortfolioBtn')?.addEventListener('click', async () => {
+  const title = document.getElementById('portfolioTitle').value.trim();
+  const category = document.getElementById('portfolioCategory').value;
+  if (!title || !category || !state.pendingPortfolioImage) {
+    showToast('Başlık, kategori ve görsel seç.', true);
+    return;
+  }
+  try {
+    await api('/api/portfolio', {
+      method: 'POST',
+      body: JSON.stringify({ title, category, image_data: state.pendingPortfolioImage })
+    });
+    if (portfolioImageInput) portfolioImageInput.value = '';
+    document.getElementById('portfolioTitle').value = '';
+    updatePortfolioPreview('');
+    await loadBootstrap();
+    showToast('El işi görseli eklendi');
+  } catch (err) {
+    showToast(err.message, true);
+  }
+});
+
+    document.getElementById('serviceCategory')?.addEventListener('change', (e) => {
+      updateServiceOptions(e.target.value);
+    });
+
+    document.getElementById('profileCity')?.addEventListener('change', (e) => {
+      populateDistricts(e.target.value);
+    });
+
+    partnerApptDate?.addEventListener('change', async () => {
+      await renderPartnerAppointmentTimes(partnerApptDate.value);
+    });
+
+    partnerScheduleDate?.addEventListener('change', async () => {
+      await renderHours(partnerScheduleDate.value);
+      if (partnerApptDate) {
+        partnerApptDate.value = partnerScheduleDate.value;
+        await renderPartnerAppointmentTimes(partnerScheduleDate.value);
+      }
+    });
+
+    createManualApptBtn?.addEventListener('click', async () => {
+      const customer_phone = document.getElementById('manualCustomerPhone').value.trim();
+      const service_name = manualServiceSelect?.value || '';
+      const appointment_date = partnerApptDate?.value || '';
+      const time_label = partnerApptTime?.value || '';
+      const note = document.getElementById('manualApptNote').value.trim();
+      if (!customer_phone || !service_name || !appointment_date || !time_label) {
+        showToast('Telefon, hizmet, tarih ve saat seç.', true);
+        return;
+      }
+      try {
+        const result = await api('/api/manual-appointments', {
+          method: 'POST',
+          body: JSON.stringify({ customer_phone, service_name, appointment_date, time_label, note })
+        });
+        document.getElementById('manualApptNote').value = '';
+        await loadBootstrap();
+        showToast('Randevu oluşturuldu');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    document.querySelectorAll('.plan-select-btn').forEach(btn => btn.addEventListener('click', () => {
+      state.selectedPlan = btn.dataset.plan;
+      renderPlans();
+      openPlanFlyout();
+      showToast(state.selectedPlan === 'daily' ? 'Günlük plan seçildi' : 'Haftalık plan seçildi');
+    }));
+
+    document.querySelectorAll('[data-quick-plan]').forEach(btn => btn.addEventListener('click', () => {
+      state.selectedPlan = btn.dataset.quickPlan;
+      renderPlans();
+      showToast(state.selectedPlan === 'daily' ? 'Günlük plan seçildi' : 'Haftalık plan seçildi');
+    }));
+
+    document.querySelectorAll('[data-top-plan]').forEach(btn => btn.addEventListener('click', () => {
+      state.selectedPlan = btn.dataset.topPlan;
+      renderPlans();
+      openPlanFlyout();
+      showToast(state.selectedPlan === 'daily' ? 'Günlük plan seçildi' : 'Haftalık plan seçildi');
+    }));
+
+    document.querySelectorAll('.method-btn').forEach(btn => btn.addEventListener('click', () => {
+      state.selectedPaymentMethod = btn.dataset.method;
+      renderPlans();
+    }));
+
+    async function purchasePlanFrom(prefix = '') {
+      const payload = {
+        active_plan: state.selectedPlan || 'weekly',
+        method: state.selectedPaymentMethod || 'card',
+        card_name: document.getElementById(prefix + 'CardName')?.value.trim() || '',
+        card_number: document.getElementById(prefix + 'CardNumber')?.value.trim() || '',
+        card_expiry: document.getElementById(prefix + 'CardExpiry')?.value.trim() || '',
+        card_cvv: document.getElementById(prefix + 'CardCvv')?.value.trim() || ''
+      };
+      if (payload.method === 'card' && (!payload.card_name || payload.card_number.replace(/\s+/g, '').length < 8 || !payload.card_expiry || !payload.card_cvv)) {
+        showToast('Kart ödeme için kart bilgilerini doldur.', true);
+        return;
+      }
+      try {
+        await api('/api/plan/purchase', { method: 'POST', body: JSON.stringify(payload) });
+        ['CardName','CardNumber','CardExpiry','CardCvv'].forEach(key => {
+          const el = document.getElementById(prefix + key);
+          if (el) el.value = '';
+        });
+        await loadBootstrap();
+        closePlanFlyoutPanel();
+        showToast('Ödeme alındı, plan aktif edildi');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    document.getElementById('activatePlanBtn')?.addEventListener('click', () => purchasePlanFrom(''));
+    document.getElementById('quickActivateBtn')?.addEventListener('click', () => purchasePlanFrom('quick'));
+
+    populateDistricts('İstanbul', 'Beşiktaş');
+    if (partnerApptDate) {
+      partnerApptDate.min = todayIso();
+      partnerApptDate.value = todayIso();
+    }
+    if (partnerScheduleDate) {
+      partnerScheduleDate.min = todayIso();
+      partnerScheduleDate.value = todayIso();
+    }
+
+    (async () => {
+      const isLoggedIn = await checkStoredLogin();
+      if (!isLoggedIn) {
+        setAuthTab('login');
+        return;
+      }
+      try {
+        await loadMeta(true);
+        renderServiceSelectors();
+        await loadBootstrap();
+        await renderPartnerAppointmentTimes(partnerApptDate?.value || todayIso());
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeautyHub</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">✨</div>
+        <div>
+          <h1>BeautyHub</h1>
+          <p>İstediğin işlemi seç, uygun uzmanı bul.</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="appointmentsBtn" class="ghost hidden">Randevularım</button>
+        <button id="authBtn" class="ghost">Giriş / Kayıt</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel controls">
+        <div class="section-head compact-gap">
+          <div>
+            <div class="mini-title">Seçim ekranı</div>
+            <h2>Ne istediğini seç</h2>
+          </div>
+        </div>
+
+        <div>
+          <div class="mini-title">Hazır seçimler</div>
+          <div id="categoryGrid" class="category-grid"></div>
+        </div>
+
+        <div class="fields-grid">
+          <div class="field-group full-row">
+            <label>💅 Uygulanan Hizmet</label>
+            <select id="serviceSelect" disabled>
+              <option>Önce hazır seçimlerden birini seç</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>📍 İl</label>
+            <select id="citySelect"><option>İstanbul</option></select>
+          </div>
+          <div class="field-group">
+            <label>🏙️ İlçe</label>
+            <select id="districtSelect"></select>
+          </div>
+          <div class="field-group">
+            <label>📅 Tarih Seçimi</label>
+            <input type="date" id="dateSelect" />
+          </div>
+          <div class="field-group">
+            <label>🕒 Saat Seçimi</label>
+            <select id="timeSelect"></select>
+          </div>
+        </div>
+
+        <button id="showExpertsBtn" class="primary sticky-cta">Uygun Uzmanları Göster</button>
+      </section>
+
+      <section class="panel results">
+        <div class="results-head compact-gap">
+          <div>
+            <div class="mini-title">Sonuçlar</div>
+            <h2>Uygun uzmanlar</h2>
+          </div>
+          <div class="muted right-note">Seçim yapınca burada görünür.</div>
+        </div>
+        <div id="resultList" class="result-list empty-state">
+          <div class="empty-emoji">🎀</div>
+          <strong>Uzmanlar burada görünecek</strong>
+          <p>Hazır seçimlerden alanı seç, sonra hizmet, ilçe ve saati belirle.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="authModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="close" data-close="authModal">×</button>
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Giriş Yap</button>
+        <button class="tab" data-tab="register">Kayıt Ol</button>
+        <button class="tab" data-tab="forgot">Şifremi Unuttum</button>
+      </div>
+      <form id="authForm">
+        <div class="field-group"><label>📱 Telefon</label><input id="phoneInput" placeholder="05xxxxxxxxx" /></div>
+        <div class="field-group"><label>🔒 Şifre</label><input id="passwordInput" type="password" placeholder="En az 6 karakter" /></div>
+        <div class="field-group hidden" id="newPasswordWrap"><label>🆕 Yeni Şifre</label><input id="newPasswordInput" type="password" placeholder="Yeni şifren" /></div>
+        <button class="primary" type="submit" id="authSubmit">Devam Et</button>
+      </form>
+      <p id="authMessage" class="muted auth-message"></p>
+    </div>
+  </div>
+
+  <div id="appointmentModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="close" data-close="appointmentModal">×</button>
+      <h3>Randevu Oluştur</h3>
+      <p id="apptProfessional" class="muted"></p>
+      <div id="apptSummary"></div>
+      <form id="appointmentForm">
+        <div class="field-group"><label>📅 Tarih</label><input type="date" id="apptDate" required /></div>
+        <div class="field-group"><label>🕒 Saat</label><select id="apptTime"></select></div>
+        <div class="field-group"><label>📝 Not</label><textarea id="apptNote" rows="3" placeholder="İstersen kısa not yaz"></textarea></div>
+        <button class="primary" type="submit">Randevuyu Kaydet</button>
+      </form>
+      <p id="apptMessage" class="muted auth-message"></p>
+    </div>
+  </div>
+
+  <div id="appointmentsModal" class="modal hidden">
+    <div class="modal-card wide">
+      <button class="close" data-close="appointmentsModal">×</button>
+      <h3>Randevularım</h3>
+      <div id="appointmentsList" class="appointment-list"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
