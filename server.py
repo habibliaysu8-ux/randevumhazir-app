@@ -603,6 +603,10 @@ class Handler(BaseHTTPRequestHandler):
             return send_file(self, STATIC_DIR / 'style.css', 'text/css; charset=utf-8')
         if path == '/app.js':
             return send_file(self, STATIC_DIR / 'app.js', 'application/javascript; charset=utf-8')
+        if path == '/robots.txt':
+            return send_file(self, STATIC_DIR / 'robots.txt', 'text/plain; charset=utf-8')
+        if path == '/sitemap.xml':
+            return send_file(self, STATIC_DIR / 'sitemap.xml', 'application/xml; charset=utf-8')
         if path == '/partner':
             return send_file(self, STATIC_DIR / 'partner' / 'index.html')
         if path == '/admin':
