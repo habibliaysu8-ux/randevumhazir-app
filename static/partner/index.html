@@ -943,6 +943,7 @@
             <div class="auth-point">💳 Üst köşeden hızlı ödeme</div>
           </div>
         </div>
+      </div>
       <div class="auth-card">
         <div class="auth-tabs">
           <button class="auth-tab active" data-auth-tab="login">Giriş Yap</button>
@@ -965,7 +966,7 @@
             <h3 style="margin:0 0 8px; font-size:28px;">Mağaza kaydı</h3>
             <p class="auth-meta">Önce hesabını oluştur. Sonra panel içinde profil, hizmet ve görünürlük planını tamamla.</p>
           </div>
-          <label>Mağaza Adı<input id="registerBusinessName" type="text" placeholder="Örn. Zehra Beauty Studio" /></label>
+          <label>Mağaza Adı<input id="registerBusinessName" type="text" placeholder="Örn. Işıl Beauty Studio" /></label>
           <label>Telefon Numarası<input id="registerPhone" type="text" placeholder="05xx xxx xx xx" /></label>
           <label>Şifre<input id="registerPassword" type="password" placeholder="En az 4 karakter" /></label>
           <div class="auth-actions">
@@ -994,7 +995,7 @@
       <button class="method-btn" data-method="link">Ödeme Linki</button>
     </div>
     <div class="card-grid" id="quickPaymentFields">
-      <label>Kart Üzerindeki İsim<input id="quickCardName" type="text" placeholder="Örn. Zehra Abdullayeva" /></label>
+      <label>Kart Üzerindeki İsim<input id="quickCardName" type="text" placeholder="Kart sahibinin adı" /></label>
       <label>Kart Numarası<input id="quickCardNumber" type="text" placeholder="1111 2222 3333 4444" /></label>
       <label>Son Kullanma<input id="quickCardExpiry" type="text" placeholder="12/28" /></label>
       <label>CVV<input id="quickCardCvv" type="password" placeholder="123" /></label>
@@ -1063,23 +1064,23 @@
         <div class="stats">
           <div class="stat-card">
             <div class="stat-label">Bugünkü Randevu</div>
-            <div class="stat-value">8</div>
-            <div class="stat-sub">2 yeni onay bekliyor</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">Yeni kayıtlar burada görünür</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Aktif Hizmet</div>
-            <div class="stat-value">12</div>
-            <div class="stat-sub">Kaş, kirpik, cilt bakımı</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">Eklediğin hizmetler burada görünür</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Bu Hafta Görüntülenme</div>
-            <div class="stat-value">236</div>
-            <div class="stat-sub">Geçen haftaya göre +18%</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">Görüntülenme verileri burada toplanır</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Plan Durumu</div>
-            <div class="stat-value">6</div>
-            <div class="stat-sub">gün kaldı</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">Plan seçildiğinde gün sayısı görünür</div>
           </div>
         </div>
 
@@ -1094,15 +1095,15 @@
             </div>
 
             <div class="store-banner">
-              <div class="store-avatar">ZA</div>
+              <div class="store-avatar">SB</div>
               <div>
-                <h3 style="margin:0 0 8px; font-size:26px;">Zehra Beauty Studio</h3>
+                <h3 style="margin:0 0 8px; font-size:26px;">Mağaza adın burada görünecek</h3>
                 <div class="row" style="margin-bottom:10px;">
-                  <span class="pill">İstanbul / Beşiktaş</span>
-                  <span class="pill">4.9 ★</span>
-                  <span class="pill">Onaylı Partner</span>
+                  <span class="pill">Şehir / İlçe</span>
+                  <span class="pill">Puan bilgisi</span>
+                  <span class="pill">Onay durumu</span>
                 </div>
-                <p class="muted" style="margin:0; line-height:1.6;">Kaş, kirpik lifting, cilt bakımı ve özel bakım uygulamaları sunan butik güzellik merkezi.</p>
+                <p class="muted" style="margin:0; line-height:1.6;">Profilini doldurduğunda müşterilere görünecek kısa açıklama burada yer alır.</p>
               </div>
             </div>
           </div>
@@ -1117,24 +1118,24 @@
             <div class="appt-list">
               <div class="appt-item">
                 <div>
-                  <strong>10:00 • Kaş Alımı</strong>
-                  <div class="tiny">Müşteri: Ayşe Yılmaz</div>
+                  <strong>Henüz yaklaşan randevu yok</strong>
+                  <div class="tiny">Yeni randevular burada listelenir.</div>
                 </div>
-                <span class="pill">Onaylandı</span>
+                <span class="pill">Bekleniyor</span>
               </div>
               <div class="appt-item">
                 <div>
-                  <strong>12:30 • Kirpik Lifting</strong>
-                  <div class="tiny">Müşteri: Elif Demir</div>
+                  <strong>Randevu geldiğinde saat burada görünür</strong>
+                  <div class="tiny">Müşteri bilgisi burada görünür.</div>
                 </div>
-                <span class="pill">Yeni</span>
+                <span class="pill">Bekleniyor</span>
               </div>
               <div class="appt-item">
                 <div>
-                  <strong>16:00 • Cilt Bakımı</strong>
-                  <div class="tiny">Müşteri: Derya Kaya</div>
+                  <strong>Randevu detayları burada görünür</strong>
+                  <div class="tiny">Durum bilgisi burada güncellenir.</div>
                 </div>
-                <span class="pill">Onaylandı</span>
+                <span class="pill">Bekleniyor</span>
               </div>
             </div>
           </div>
@@ -1153,11 +1154,11 @@
           <div class="card-grid">
             <label>
               İşletme Adı
-              <input type="text" value="Zehra Beauty Studio" />
+              <input type="text" value="" placeholder="İşletme adın" />
             </label>
             <label>
               Telefon
-              <input type="text" value="0555 000 00 00" />
+              <input type="text" value="" placeholder="05xx xxx xx xx" />
             </label>
             <label>
               İl
@@ -1173,11 +1174,11 @@
             </label>
             <label class="full">
               Adres
-              <input type="text" value="Levent Mahallesi, No:14 Beşiktaş / İstanbul" />
+              <input type="text" value="" placeholder="Açık adres" />
             </label>
             <label class="full">
               Açıklama
-              <textarea>Kaş tasarımı, kirpik lifting, cilt bakımı ve kişisel bakım uygulamalarında profesyonel hizmet sunuyoruz.</textarea>
+              <textarea placeholder="Mağazanı kısa ve net anlat"></textarea>
             </label>
           </div>
 
@@ -1385,7 +1386,7 @@
             <div class="card-grid" id="paymentFields">
               <label>
                 Kart Üzerindeki İsim
-                <input id="cardName" type="text" placeholder="Örn. Zehra Abdullayeva" />
+                <input id="cardName" type="text" placeholder="Kart sahibinin adı" />
               </label>
               <label>
                 Kart Numarası
@@ -2026,9 +2027,9 @@ function updatePortfolioPreview(src = '', title = '') {
         if (state.selectedPaymentMethod === 'card') {
           paymentHint.textContent = `${selectedName} seçildi. Kart bilgilerini girip planı hemen aktif edebilirsin.`;
         } else if (state.selectedPaymentMethod === 'eft') {
-          paymentHint.textContent = `${selectedName} seçildi. EFT/Havale ile ödeme kaydı demo olarak oluşturulur ve plan aktif edilir.`;
+          paymentHint.textContent = `${selectedName} seçildi. EFT/Havale ile ödeme kaydı oluşturulur ve plan aktif edilir.`;
         } else {
-          paymentHint.textContent = `${selectedName} seçildi. Ödeme linki seçildiğinde demo ödeme tamamlanır ve plan aktif edilir.`;
+          paymentHint.textContent = `${selectedName} seçildi. Ödeme linki seçildiğinde ödeme tamamlanır ve plan aktif edilir.`;
         }
       }
 
@@ -2337,7 +2338,7 @@ document.getElementById('addPortfolioBtn')?.addEventListener('click', async () =
         });
         document.getElementById('manualApptNote').value = '';
         await loadBootstrap();
-        showToast(result.created_customer ? `Randevu oluşturuldu. Yeni müşteri şifresi: ${result.default_password}` : 'Randevu oluşturuldu');
+        showToast('Randevu oluşturuldu');
       } catch (err) {
         showToast(err.message, true);
       }

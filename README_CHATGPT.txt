@@ -9,11 +9,6 @@ Musteri: http://localhost:8000/
 Partner: http://localhost:8000/partner
 Admin:   http://localhost:8000/admin
 
-Demo hesaplar:
-Musteri: 05001234567 / 123456
-Partner: 05550000000 / 123456
-Admin:   admin@beautyhub.local / 123456
-
 Notlar:
 - Musteri panelinde tarih + saat secimi var.
 - Partner kayit/giris gercek backend ile calisir.

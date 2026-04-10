@@ -1,5 +1,5 @@
-import os
 import json
+import os
 import secrets
 import sqlite3
 from datetime import date, datetime, timedelta
@@ -15,6 +15,8 @@ STATIC_DIR = BASE_DIR / 'static'
 DB_PATH = BASE_DIR / 'beautyhub_connected.db'
 HOST = '0.0.0.0'
 PORT = int(os.getenv('PORT', '8000'))
+ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', '').strip()
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', '').strip()
 
 CUSTOMER_SESSIONS = {}
 PARTNER_SESSIONS = {}
@@ -400,87 +402,12 @@ def init_db():
     ensure_column(conn, 'partner_date_slots', 'slot_times', "slot_times TEXT NOT NULL DEFAULT '[]'")
     ensure_column(conn, 'partner_date_slots', 'is_open', 'is_open INTEGER NOT NULL DEFAULT 1')
     ensure_column(conn, 'partner_date_slots', 'updated_at', "updated_at TEXT NOT NULL DEFAULT ''")
-
-    cur.execute('SELECT id FROM admin_users WHERE email=?', ('admin@beautyhub.local',))
-    if not cur.fetchone():
-        cur.execute('INSERT INTO admin_users (email, password_hash, full_name, created_at) VALUES (?,?,?,?)', (
-            'admin@beautyhub.local', hash_password('123456'), 'BeautyHub Admin', datetime.now().strftime('%d.%m.%Y %H:%M')
-        ))
-
-    cur.execute('SELECT id FROM customer_users WHERE phone=?', ('05001234567',))
-    if not cur.fetchone():
-        cur.execute('INSERT INTO customer_users (phone, password_hash, created_at) VALUES (?,?,?)', ('05001234567', hash_password('123456'), datetime.now().strftime('%d.%m.%Y %H:%M')))
-
-    def ensure_partner(business_name, phone, password, city, district, address, description, rating, services, active_plan='weekly', approval_status='approved'):
-        row = cur.execute('SELECT id FROM partner_users WHERE phone=?', (phone,)).fetchone()
-        if row:
-            pid = row['id']
-        else:
-            cur.execute('INSERT INTO partner_users (business_name, phone, password_hash, created_at) VALUES (?,?,?,?)', (business_name, phone, hash_password(password), datetime.now().strftime('%d.%m.%Y %H:%M')))
-            pid = cur.lastrowid
-        cur.execute('INSERT OR REPLACE INTO partner_profiles (partner_user_id,business_name,phone,city,district,address,description,rating) VALUES (?,?,?,?,?,?,?,?)', (pid,business_name,phone,city,district,address,description,rating))
-        cur.execute('INSERT OR IGNORE INTO partner_settings (partner_user_id,email_notifications,message_notifications) VALUES (?,?,?)', (pid,1,1))
-        days_left = 6 if active_plan == 'weekly' else 1 if active_plan == 'daily' else 0
-        ends_at = (date.today() + timedelta(days=days_left)).strftime('%d %B') if days_left else 'Plan seçilmedi'
-        cur.execute('INSERT OR REPLACE INTO partner_plan (partner_user_id,active_plan,daily_price,weekly_price,days_left,ends_at) VALUES (?,?,?,?,?,?)', (pid, active_plan, 150, 910, days_left, ends_at))
-        cur.execute('INSERT OR REPLACE INTO partner_admin (partner_user_id,approval_status,visible_in_market,note,updated_at) VALUES (?,?,?,?,?)', (pid, approval_status, 1, '', datetime.now().strftime('%d.%m.%Y %H:%M')))
-        existing = cur.execute('SELECT COUNT(*) c FROM partner_services WHERE partner_user_id=?', (pid,)).fetchone()['c']
-        if existing == 0:
-            for s in services:
-                cur.execute('INSERT INTO partner_services (partner_user_id,name,category,price,duration) VALUES (?,?,?,?,?)', (pid, s[0], s[1], s[2], s[3]))
-        portfolio_count = cur.execute('SELECT COUNT(*) c FROM partner_portfolio WHERE partner_user_id=?', (pid,)).fetchone()['c']
-        if portfolio_count == 0:
-            for idx, s in enumerate(services[:3]):
-                cat = normalize_category(s[1])
-                cur.execute('INSERT INTO partner_portfolio (partner_user_id, category, title, image_data, created_at) VALUES (?,?,?,?,?)', (pid, cat, s[0], default_portfolio_image(s[0], cat, idx), datetime.now().strftime('%d.%m.%Y %H:%M')))
-        existing_hours = cur.execute('SELECT COUNT(*) c FROM partner_hours WHERE partner_user_id=?', (pid,)).fetchone()['c']
-        if existing_hours == 0:
-            for day_name, start, end, open_ in [
-                ('Pazartesi','10:00','19:00',1),('Salı','10:00','19:00',1),('Çarşamba','10:00','19:00',1),('Perşembe','10:00','19:00',1),('Cuma','10:00','19:00',1),('Cumartesi','11:00','18:00',1),('Pazar','10:00','19:00',0)
-            ]:
-                cur.execute('INSERT INTO partner_hours (partner_user_id,day_name,start_time,end_time,is_open,slot_times) VALUES (?,?,?,?,?,?)', (pid, day_name, start, end, open_, json.dumps(default_slots_for_day(day_name, open_), ensure_ascii=False)))
-        else:
-            rows = cur.execute('SELECT id, day_name, is_open, slot_times FROM partner_hours WHERE partner_user_id=?', (pid,)).fetchall()
-            for row in rows:
-                if not parse_slot_times(row['slot_times']) and row['is_open']:
-                    cur.execute('UPDATE partner_hours SET slot_times=? WHERE id=?', (json.dumps(default_slots_for_day(row['day_name'], row['is_open']), ensure_ascii=False), row['id']))
-        return pid
-
-    zehra_id = ensure_partner(
-        'Zehra Beauty Studio','05550000000','123456','İstanbul','Beşiktaş','Levent Mahallesi, No:14 Beşiktaş / İstanbul',
-        'Kaş tasarımı, kirpik lifting, cilt bakımı ve kişisel bakım uygulamalarında profesyonel hizmet sunuyoruz.',4.9,
-        [('Kaş Alımı','Kaş & Kirpik',250,30),('Kirpik Lifting','Kaş & Kirpik',850,60),('Hydrafacial Bakım','Cilt Bakımı',1200,75)],
-        'weekly','approved'
-    )
-    ensure_partner(
-        'Lina Beauty','05550000001','123456','İstanbul','Kadıköy','Moda, Kadıköy / İstanbul',
-        'Moda tarafında güçlü nail art ve düzenli bakım hizmetleri.',4.9,
-        [('Protez Tırnak','Tırnak',900,90),('Jel Tırnak','Tırnak',750,70),('Nail Art','Tırnak',1100,100)],
-        'weekly','approved'
-    )
-    ensure_partner(
-        'Nisa Hair Studio','05550000002','123456','İstanbul','Şişli','Mecidiyeköy / İstanbul',
-        'Kesim, boya ve bakım işlemlerinde hızlı randevu akışı.',4.8,
-        [('Kesim','Saç',450,45),('Fön','Saç',350,35),('Ombre','Saç',2400,180)],
-        'daily','approved'
-    )
-    ensure_partner(
-        'Maya Make Up','05550000003','123456','İstanbul','Kadıköy','Bağdat Caddesi / İstanbul',
-        'Gece ve özel gün makyajı uygulamalarında yoğun tercih.',4.9,
-        [('Günlük Makyaj','Makyaj',850,60),('Gece Makyajı','Makyaj',1200,80),('Gelin Makyajı','Makyaj',4500,180)],
-        'weekly','approved'
-    )
-
-    c = cur.execute('SELECT COUNT(*) c FROM appointments WHERE partner_user_id=?', (zehra_id,)).fetchone()['c']
-    if c == 0:
-        customer_id = cur.execute('SELECT id FROM customer_users WHERE phone=?', ('05001234567',)).fetchone()['id']
-        for service_name, category, dt, tm, price, status in [
-            ('Kaş Alımı','Kaş & Kirpik','Bugün','10:00',250,'approved'),
-            ('Kirpik Lifting','Kaş & Kirpik','Bugün','12:30',850,'pending'),
-            ('Hydrafacial Bakım','Cilt Bakımı','Yarın','16:00',1200,'pending')
-        ]:
-            cur.execute('INSERT INTO appointments (customer_user_id, partner_user_id, service_name, category, district, appointment_date, time_label, note, price, status, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)', (customer_id, zehra_id, service_name, category, 'Beşiktaş', dt, tm, '', price, status, datetime.now().strftime('%d.%m.%Y %H:%M')))
-
+    if ADMIN_EMAIL and ADMIN_PASSWORD:
+        cur.execute('SELECT id FROM admin_users WHERE email=?', (ADMIN_EMAIL,))
+        if not cur.fetchone():
+            cur.execute('INSERT INTO admin_users (email, password_hash, full_name, created_at) VALUES (?,?,?,?)', (
+                ADMIN_EMAIL, hash_password(ADMIN_PASSWORD), 'Site Yöneticisi', datetime.now().strftime('%d.%m.%Y %H:%M')
+            ))
 
     portfolio_missing = cur.execute('SELECT id FROM partner_users WHERE id NOT IN (SELECT partner_user_id FROM partner_portfolio)').fetchall()
     for row in portfolio_missing:
@@ -960,16 +887,12 @@ class Handler(BaseHTTPRequestHandler):
                     if not service_row:
                         return json_response(self, {'error': 'Bu hizmet mağazada bulunamadı.'}, 404)
                     customer_row = conn.execute('SELECT id FROM customer_users WHERE phone=?', (customer_phone,)).fetchone()
-                    created_customer = False
-                    if customer_row:
-                        customer_id = customer_row['id']
-                    else:
-                        cur.execute('INSERT INTO customer_users (phone, password_hash, created_at) VALUES (?,?,?)', (customer_phone, hash_password('123456'), datetime.now().strftime('%d.%m.%Y %H:%M')))
-                        customer_id = cur.lastrowid
-                        created_customer = True
+                    if not customer_row:
+                        return json_response(self, {'error': 'Bu telefon numarasıyla kayıtlı bir müşteri bulunamadı.'}, 404)
+                    customer_id = customer_row['id']
                     district_row = conn.execute('SELECT district FROM partner_profiles WHERE partner_user_id=?', (pid,)).fetchone()
                     cur.execute('INSERT INTO appointments (customer_user_id, partner_user_id, service_name, category, district, appointment_date, time_label, note, price, status, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)', (customer_id, pid, service_name, service_row['category'], district_row['district'] if district_row else '', appointment_date, time_label, note, int(service_row['price']), 'approved', datetime.now().strftime('%d.%m.%Y %H:%M')))
-                    conn.commit(); return json_response(self, {'ok': True, 'created_customer': created_customer, 'default_password': '123456' if created_customer else ''})
+                    conn.commit(); return json_response(self, {'ok': True})
 
                 if path == '/api/portfolio':
                     title = data.get('title','').strip()

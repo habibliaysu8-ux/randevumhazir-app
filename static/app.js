@@ -226,7 +226,7 @@ async function refreshMe() {
   const data = await api('/customer-api/me');
   state.user = data.user;
   if (state.user) {
-    authBtn.textContent = `${state.user.phone} / Çıkış`;
+    authBtn.textContent = `Hesabım / Çıkış`;
     appointmentsBtn.classList.remove('hidden');
   } else {
     authBtn.textContent = 'Giriş / Kayıt';
