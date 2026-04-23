@@ -1,8 +1,4 @@
 User-agent: *
 Allow: /
 
-Disallow: /partner
-Disallow: /admin
-Disallow: /admin-panel
-
-Sitemap: https://randevumhazir.online/sitemap.xml
+Sitemap: https://YOUR_DOMAIN/sitemap.xml
