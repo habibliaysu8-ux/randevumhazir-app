@@ -1,0 +1,19 @@
+{
+  "users": [
+    {
+      "id": "admin_1",
+      "role": "admin",
+      "name": "Randevumhazır Admin",
+      "email": "admin@randevumhazir.com",
+      "phone": "05000000000",
+      "password": "Admin123!",
+      "createdAt": "2026-04-21T00:00:00.000Z"
+    }
+  ],
+  "salons": [],
+  "staff": [],
+  "services": [],
+  "slots": [],
+  "bookings": [],
+  "payments": []
+}
