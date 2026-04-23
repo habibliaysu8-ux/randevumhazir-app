@@ -1,0 +1,118 @@
+{
+  "users": [
+    {
+      "id": "admin_1",
+      "role": "admin",
+      "name": "Randevumhazır Admin",
+      "email": "admin@randevumhazir.com",
+      "phone": "05000000000",
+      "password": "Admin123!",
+      "createdAt": "2026-04-21T00:00:00.000Z"
+    },
+    {
+      "id": "partner_1776957981217_ibuolw",
+      "role": "partner",
+      "name": "Aysu",
+      "email": "habibliaysu8@gmail.com",
+      "phone": "05016628434",
+      "password": "test123",
+      "createdAt": "2026-04-23T15:26:21.217Z",
+      "billing": {
+        "trialStartedAt": "2026-04-23T15:26:21.217Z",
+        "trialEndsAt": "2026-04-25T15:26:21.217Z",
+        "activePlan": null,
+        "planStartedAt": null,
+        "planEndsAt": null,
+        "lastPaymentId": null
+      }
+    },
+    {
+      "id": "customer_1776958080196_jdid6e",
+      "role": "customer",
+      "name": "Aysu",
+      "email": "aysuhabibli8@gmail.com",
+      "phone": "05016628434",
+      "password": "test123",
+      "createdAt": "2026-04-23T15:28:00.196Z"
+    }
+  ],
+  "salons": [
+    {
+      "id": "salon_1776958006501_p0c3bl",
+      "rating": 4.8,
+      "reviewCount": 0,
+      "isFeatured": false,
+      "status": "active",
+      "createdAt": "2026-04-23T15:26:46.501Z",
+      "partnerId": "partner_1776957981217_ibuolw",
+      "name": "Test",
+      "slug": "test",
+      "category": "Test",
+      "categories": [
+        "Test"
+      ],
+      "cityId": 34,
+      "city": "İstanbul",
+      "district": "Bayrampaşa",
+      "address": "Test",
+      "description": "",
+      "coverImage": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80"
+    }
+  ],
+  "staff": [
+    {
+      "id": "staff_1776958018564_vn4yqn",
+      "salonId": "salon_1776958006501_p0c3bl",
+      "name": "Test",
+      "title": "Uzman",
+      "createdAt": "2026-04-23T15:26:58.564Z"
+    }
+  ],
+  "services": [
+    {
+      "id": "service_1776958015859_glnwh5",
+      "salonId": "salon_1776958006501_p0c3bl",
+      "name": "Test",
+      "duration": 20,
+      "price": 1000,
+      "category": "Test",
+      "createdAt": "2026-04-23T15:26:55.859Z"
+    }
+  ],
+  "slots": [
+    {
+      "id": "slot_1776958026068_drn3vx",
+      "partnerId": "partner_1776957981217_ibuolw",
+      "salonId": "salon_1776958006501_p0c3bl",
+      "serviceId": "service_1776958015859_glnwh5",
+      "staffId": "staff_1776958018564_vn4yqn",
+      "date": "2026-04-23",
+      "startTime": "09:00",
+      "endTime": "09:20",
+      "status": "booked",
+      "createdAt": "2026-04-23T15:27:06.069Z"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "booking_1776958086144_2f637n",
+      "customerId": "customer_1776958080196_jdid6e",
+      "salonId": "salon_1776958006501_p0c3bl",
+      "serviceId": "service_1776958015859_glnwh5",
+      "staffId": "staff_1776958018564_vn4yqn",
+      "slotId": "slot_1776958026068_drn3vx",
+      "partnerId": "partner_1776957981217_ibuolw",
+      "salonName": "Test",
+      "serviceName": "Test",
+      "staffName": "Test",
+      "date": "2026-04-23",
+      "startTime": "09:00",
+      "endTime": "09:20",
+      "status": "confirmed",
+      "notes": "test",
+      "createdAt": "2026-04-23T15:28:06.144Z",
+      "updatedAt": "2026-04-23T15:28:26.504Z"
+    }
+  ],
+  "payments": []
+}
