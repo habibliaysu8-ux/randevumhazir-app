@@ -606,6 +606,35 @@ async function refreshDistrictsAndCloud() {
   renderDistrictCloud(districtResponse.data, optionText(byId('citySelect')));
 }
 
+
+function setupAuthTabs() {
+  const tabs = [...document.querySelectorAll('[data-auth-tab]')];
+  const panels = [...document.querySelectorAll('[data-auth-panel]')];
+  const quickLinks = [...document.querySelectorAll('[data-auth-open]')];
+
+  if (!tabs.length || !panels.length) return;
+
+  const setActive = (name) => {
+    tabs.forEach((tab) => {
+      tab.classList.toggle('active', tab.dataset.authTab === name);
+    });
+
+    panels.forEach((panel) => {
+      panel.classList.toggle('active', panel.dataset.authPanel === name);
+    });
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => setActive(tab.dataset.authTab));
+  });
+
+  quickLinks.forEach((btn) => {
+    btn.addEventListener('click', () => setActive(btn.dataset.authOpen));
+  });
+
+  setActive('login');
+}
+
 function bindEvents() {
   byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error')));
   byId('loginBtn').addEventListener('click', () => loginCustomer().catch((error) => showToast(error.message, 'error')));
@@ -658,6 +687,8 @@ function bindEvents() {
     await refreshDistrictsAndCloud();
     await Promise.all([loadFeatured(), searchStores()]);
   });
+
+  setupAuthTabs();
 }
 
 async function initPage() {
