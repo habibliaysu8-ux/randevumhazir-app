@@ -154,37 +154,83 @@
     </section>
   </div>
 
+
+
+
   <div class="modal" id="authModal">
-    <div class="modal-card small">
-      <div class="modal-header">
-        <div>
-          <div class="eyebrow">Müşteri hesabı</div>
-          <h3 class="modal-title">Giriş yap veya kayıt ol</h3>
-        </div>
-        <button class="modal-close" data-close="authModal">✕</button>
+  <div class="modal-card small auth-sheet">
+    <div class="auth-sheet-handle"></div>
+
+    <div class="modal-header auth-sheet-header">
+      <div>
+        <div class="eyebrow">Müşteri hesabı</div>
+        <h3 class="modal-title">Giriş yap veya kayıt ol</h3>
       </div>
-      <div class="modal-body columns-2 compact-gap">
-        <div class="sheet-card">
-          <h4>Giriş</h4>
-          <div class="form-stack">
-            <div class="field"><label>E-posta</label><input id="loginEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" /></div>
-            <div class="field"><label>Şifre</label><input id="loginPassword" type="password" placeholder="••••••••" autocomplete="new-password" /></div>
-            <button id="loginBtn" class="button dark full">Giriş yap</button>
+      <button class="modal-close" data-close="authModal">✕</button>
+    </div>
+
+    <div class="auth-switch">
+      <button type="button" class="auth-tab active" data-auth-tab="login">Giriş</button>
+      <button type="button" class="auth-tab" data-auth-tab="register">Kayıt</button>
+    </div>
+
+    <div class="modal-body columns-2 compact-gap auth-sheet-body">
+      <div class="sheet-card auth-panel active" data-auth-panel="login">
+        <h4>Giriş</h4>
+        <div class="form-stack">
+          <div class="field">
+            <label>E-posta</label>
+            <input id="loginEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" />
           </div>
+
+          <div class="field">
+            <label>Şifre</label>
+            <input id="loginPassword" type="password" placeholder="Şifrenizi girin" autocomplete="new-password" />
+          </div>
+
+          <button id="loginBtn" class="button dark full">Giriş yap</button>
+
+          <p class="auth-panel-note">
+            Hesabın yok mu?
+            <button type="button" class="auth-link-btn" data-auth-open="register">Kayıt ol</button>
+          </p>
         </div>
-        <div class="sheet-card">
-          <h4>Kayıt</h4>
-          <div class="form-stack">
-            <div class="field"><label>Ad Soyad</label><input id="registerName" type="text" placeholder="Ad Soyad" autocomplete="off" /></div>
-            <div class="field"><label>Telefon</label><input id="registerPhone" type="tel" placeholder="05xx xxx xx xx" autocomplete="off" /></div>
-            <div class="field"><label>E-posta</label><input id="registerEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" /></div>
-            <div class="field"><label>Şifre</label><input id="registerPassword" type="password" placeholder="En az 6 karakter" autocomplete="new-password" /></div>
-            <button id="registerBtn" class="button dark full">Kayıt ol</button>
+      </div>
+
+      <div class="sheet-card auth-panel" data-auth-panel="register">
+        <h4>Kayıt</h4>
+        <div class="form-stack">
+          <div class="field">
+            <label>Ad Soyad</label>
+            <input id="registerName" type="text" placeholder="Ad Soyad" autocomplete="off" />
           </div>
+
+          <div class="field">
+            <label>Telefon</label>
+            <input id="registerPhone" type="tel" placeholder="05xx xxx xx xx" autocomplete="off" />
+          </div>
+
+          <div class="field">
+            <label>E-posta</label>
+            <input id="registerEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" />
+          </div>
+
+          <div class="field">
+            <label>Şifre</label>
+            <input id="registerPassword" type="password" placeholder="En az 6 karakter" autocomplete="new-password" />
+          </div>
+
+          <button id="registerBtn" class="button dark full">Kayıt ol</button>
+
+          <p class="auth-panel-note">
+            Zaten hesabın var mı?
+            <button type="button" class="auth-link-btn" data-auth-open="login">Giriş yap</button>
+          </p>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <div class="modal" id="salonModal">
     <div class="modal-card wide">
