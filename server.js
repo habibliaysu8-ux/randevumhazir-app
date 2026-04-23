@@ -520,10 +520,23 @@ ${summary}`
 }
 
 function serveStatic(req, res, pathname) {
-  let filePath = path.join(PUBLIC_DIR, pathname === '/' ? 'index.html' : pathname);
-  if (!filePath.startsWith(PUBLIC_DIR)) return notFound(res);
-  if (!fs.existsSync(filePath)) return notFound(res);
-  if (fs.statSync(filePath).isDirectory()) filePath = path.join(filePath, 'index.html');
+  const normalized = pathname === '/' ? 'index.html' : String(pathname).replace(/^\/+/, '');
+
+  const candidates = [
+    path.join(PUBLIC_DIR, normalized),
+    path.join(ROOT, normalized)
+  ];
+
+  let filePath = candidates.find((candidate) => candidate.startsWith(ROOT) && fs.existsSync(candidate));
+
+  if (!filePath) return notFound(res);
+
+  if (fs.statSync(filePath).isDirectory()) {
+    const indexCandidate = path.join(filePath, 'index.html');
+    if (!fs.existsSync(indexCandidate)) return notFound(res);
+    filePath = indexCandidate;
+  }
+
   const ext = path.extname(filePath).toLowerCase();
   const contentType = mimeTypes[ext] || 'application/octet-stream';
   res.writeHead(200, { 'Content-Type': contentType });
