@@ -525,34 +525,100 @@ function startBookingFlow() {
   openModal('bookingModal');
 }
 
+function setInlineFeedback(targetId, message = '', type = 'error') {
+  const el = byId(targetId);
+  if (!el) return;
+  if (!message) {
+    el.hidden = true;
+    el.textContent = '';
+    el.className = 'inline-feedback';
+    return;
+  }
+  el.hidden = false;
+  el.textContent = message;
+  el.className = `inline-feedback ${type}`;
+}
+
+function clearAuthInlineFeedback() {
+  setInlineFeedback('loginInlineFeedback');
+  setInlineFeedback('registerInlineFeedback');
+  setInlineFeedback('forgotInlineFeedback');
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+}
+
 async function loginCustomer() {
+  clearAuthInlineFeedback();
   const email = byId('loginEmail').value.trim();
   const password = byId('loginPassword').value.trim();
-  const { user } = await API.post('/api/auth/login', { email, password, role: 'customer' });
-  customerState.customer = user;
-  Store.set(CUSTOMER_KEY, user);
-  closeModal('authModal');
-  renderBookingPreview();
-  showToast('Giriş başarılı.', 'success');
-  if (customerState.selectedSlot) openModal('bookingModal');
+
+  if (!email && !password) {
+    setInlineFeedback('loginInlineFeedback', 'Giriş için e-posta ve şifreyi doldur.');
+    return;
+  }
+  if (!email) {
+    setInlineFeedback('loginInlineFeedback', 'E-posta alanını doldur.');
+    return;
+  }
+  if (!password) {
+    setInlineFeedback('loginInlineFeedback', 'Şifre alanını doldur.');
+    return;
+  }
+  if (!isValidEmail(email)) {
+    setInlineFeedback('loginInlineFeedback', 'Geçerli bir e-posta adresi yaz.');
+    return;
+  }
+
+  try {
+    const { user } = await API.post('/api/auth/login', { email, password, role: 'customer' });
+    customerState.customer = user;
+    Store.set(CUSTOMER_KEY, user);
+    closeModal('authModal');
+    renderBookingPreview();
+    showToast('Giriş başarılı.', 'success');
+    if (customerState.selectedSlot) openModal('bookingModal');
+  } catch (error) {
+    setInlineFeedback('loginInlineFeedback', error.message || 'Giriş yapılamadı.');
+  }
 }
 
 async function registerCustomer() {
+  clearAuthInlineFeedback();
   const name = byId('registerName').value.trim();
   const phone = byId('registerPhone').value.trim();
   const email = byId('registerEmail').value.trim();
   const password = byId('registerPassword').value.trim();
   const legalConsent = byId('registerLegalConsent');
-  if (legalConsent && !legalConsent.checked) {
-    showToast('Kayıt için sözleşme ve KVKK onayını işaretle.', 'error');
+
+  if (!name || !phone || !email || !password) {
+    setInlineFeedback('registerInlineFeedback', 'Kayıt için tüm alanları doldur.');
     return;
   }
-  const { user } = await API.post('/api/auth/register', { role: 'customer', name, phone, email, password });
-  customerState.customer = user;
-  Store.set(CUSTOMER_KEY, user);
-  closeModal('authModal');
-  renderBookingPreview();
-  showToast('Kayıt tamamlandı.', 'success');
+  if (!isValidEmail(email)) {
+    setInlineFeedback('registerInlineFeedback', 'Geçerli bir e-posta adresi yaz.');
+    return;
+  }
+  if (password.length < 6) {
+    setInlineFeedback('registerInlineFeedback', 'Şifre en az 6 karakter olmalı.');
+    return;
+  }
+  if (legalConsent && !legalConsent.checked) {
+    setInlineFeedback('registerInlineFeedback', 'Kayıt için sözleşme ve KVKK onayını işaretle.');
+    return;
+  }
+
+  try {
+    const { user } = await API.post('/api/auth/register', { role: 'customer', name, phone, email, password });
+    customerState.customer = user;
+    Store.set(CUSTOMER_KEY, user);
+    closeModal('authModal');
+    renderBookingPreview();
+    showToast('Kayıt tamamlandı.', 'success');
+  } catch (error) {
+    setInlineFeedback('registerInlineFeedback', error.message || 'Kayıt tamamlanamadı.');
+  }
 }
 
 async function confirmBooking() {
@@ -609,8 +675,8 @@ async function refreshDistrictsAndCloud() {
 
 function bindEvents() {
   byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error')));
-  byId('loginBtn').addEventListener('click', () => loginCustomer().catch((error) => showToast(error.message, 'error')));
-  byId('registerBtn').addEventListener('click', () => registerCustomer().catch((error) => showToast(error.message, 'error')));
+  byId('loginBtn').addEventListener('click', loginCustomer);
+  byId('registerBtn').addEventListener('click', registerCustomer);
   byId('confirmBookingBtn').addEventListener('click', () => confirmBooking().catch((error) => showToast(error.message, 'error')));
 
   document.querySelectorAll('[data-time-chip]').forEach((chip) => {

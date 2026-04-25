@@ -2530,3 +2530,29 @@ body.fresha-inspired-body {
 .legal-consent-row a { font-weight: 600 !important; text-decoration: none !important; }
 .legal-consent-row a:hover { color: #111111 !important; text-decoration: underline !important; }
 .legal-footer-v4 a { color: #111111 !important; font-size: 10px !important; font-weight: 400 !important; text-decoration: none !important; }
+
+
+.legal-consent-row input[type="checkbox"] {
+  accent-color: #111111;
+}
+
+.inline-feedback {
+  display: block;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.inline-feedback.error {
+  background: rgba(181, 61, 86, 0.12);
+  color: #8e2338;
+  border: 1px solid rgba(181, 61, 86, 0.18);
+}
+
+.inline-feedback.success {
+  background: rgba(42, 113, 72, 0.10);
+  color: #215d3b;
+  border: 1px solid rgba(42, 113, 72, 0.18);
+}

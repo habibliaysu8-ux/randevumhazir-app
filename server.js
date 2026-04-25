@@ -703,7 +703,7 @@ async function handleApi(req, res, url) {
     const password = String(body.password || '');
     const role = String(body.role || '');
     const user = db.users.find((item) => item.email === email && item.password === password && (!role || item.role === role));
-    if (!user) return json(res, 401, { error: 'E-posta, şifre veya rol hatalı.' });
+    if (!user) return json(res, 401, { error: 'E-posta veya şifre hatalı.' });
     return json(res, 200, { user: publicUser(user) });
   }
 
