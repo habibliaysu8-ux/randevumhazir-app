@@ -3,6 +3,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { URL } = require('node:url');
 const nodemailer = require('nodemailer');
+const crypto = require('node:crypto');
+const { Pool } = require('pg');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
@@ -11,6 +13,26 @@ const PUBLIC_DIR = path.join(ROOT, 'public');
 const DATA_DIR = path.join(ROOT, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 const GEO_CACHE_FILE = path.join(DATA_DIR, 'geo-cache.json');
+
+let pgPool = null;
+let pgReady = false;
+
+function usePostgres() {
+  return Boolean(process.env.DATABASE_URL);
+}
+
+function getPgPool() {
+  if (!usePostgres()) return null;
+  if (!pgPool) {
+    const sslSetting = String(process.env.DATABASE_SSL || 'true').toLowerCase();
+    pgPool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: sslSetting === 'false' ? false : { rejectUnauthorized: false }
+    });
+  }
+  return pgPool;
+}
+
 
 const PROVINCES = [
   { id: 34, name: 'İstanbul' },
@@ -75,6 +97,41 @@ function uid(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(String(password || ''), salt, 120000, 32, 'sha256').toString('hex');
+  return `pbkdf2$120000$${salt}$${hash}`;
+}
+
+function verifyPassword(storedPassword, incomingPassword) {
+  const stored = String(storedPassword || '');
+  const incoming = String(incomingPassword || '');
+  if (!stored.startsWith('pbkdf2$')) return stored === incoming;
+  const parts = stored.split('$');
+  if (parts.length !== 4) return false;
+  const iterations = Number(parts[1]);
+  const salt = parts[2];
+  const expected = Buffer.from(parts[3], 'hex');
+  const actual = crypto.pbkdf2Sync(incoming, salt, iterations, expected.length, 'sha256');
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+function hashResetToken(token) {
+  return crypto.createHash('sha256').update(String(token || '')).digest('hex');
+}
+
+function addMinutesToIso(baseDate, minutes) {
+  const date = baseDate ? new Date(baseDate) : new Date();
+  date.setMinutes(date.getMinutes() + Number(minutes || 0));
+  return date.toISOString();
+}
+
+function publicBaseUrl(req) {
+  if (process.env.PUBLIC_BASE_URL) return String(process.env.PUBLIC_BASE_URL).replace(/\/$/, '');
+  const proto = req.headers['x-forwarded-proto'] || 'http';
+  return `${proto}://${req.headers.host}`;
+}
+
 function addMinutesToTime(time, minutesToAdd) {
   const [hours, minutes] = String(time || '00:00').split(':').map(Number);
   const total = hours * 60 + minutes + minutesToAdd;
@@ -123,6 +180,7 @@ function normalizeDb(db) {
   db.slots = Array.isArray(db.slots) ? db.slots : [];
   db.bookings = Array.isArray(db.bookings) ? db.bookings : [];
   db.payments = Array.isArray(db.payments) ? db.payments : [];
+  db.passwordResets = Array.isArray(db.passwordResets) ? db.passwordResets : [];
   db.users.forEach(ensurePartnerBilling);
   return db;
 }
@@ -215,7 +273,7 @@ function createSeedDb() {
   const adminName = String(process.env.ADMIN_NAME || 'Randevumhazır Admin').trim();
   return {
     users: [
-      { id: 'admin_1', role: 'admin', name: adminName, email: adminEmail, phone: '05000000000', password: adminPassword, createdAt }
+      { id: 'admin_1', role: 'admin', name: adminName, email: adminEmail, phone: '05000000000', password: hashPassword(adminPassword), createdAt }
     ],
     salons: [],
     staff: [],
@@ -244,13 +302,42 @@ function ensureDataFiles() {
   }
 }
 
-function readDb() {
+async function ensurePostgresState() {
+  const pool = getPgPool();
+  if (!pool || pgReady) return;
+  await pool.query(`CREATE TABLE IF NOT EXISTS rh_state (
+    id TEXT PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  )`);
+  const existing = await pool.query('SELECT id FROM rh_state WHERE id = $1', ['main']);
+  if (!existing.rowCount) {
+    await pool.query('INSERT INTO rh_state (id, data) VALUES ($1, $2::jsonb)', ['main', JSON.stringify(createSeedDb())]);
+  }
+  pgReady = true;
+}
+
+async function readDb() {
+  if (usePostgres()) {
+    await ensurePostgresState();
+    const result = await getPgPool().query('SELECT data FROM rh_state WHERE id = $1', ['main']);
+    return normalizeDb(result.rows[0]?.data || createSeedDb());
+  }
   ensureDataFiles();
   return normalizeDb(safeJsonParse(fs.readFileSync(DB_FILE, 'utf-8'), createSeedDb()));
 }
 
-function writeDb(db) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
+async function writeDb(db) {
+  const data = normalizeDb(db);
+  if (usePostgres()) {
+    await ensurePostgresState();
+    await getPgPool().query(
+      'INSERT INTO rh_state (id, data, updated_at) VALUES ($1, $2::jsonb, now()) ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = now()',
+      ['main', JSON.stringify(data)]
+    );
+    return;
+  }
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
 }
 
 function getService(db, serviceId) {
@@ -321,8 +408,8 @@ function getSalonSummary(db, salon, filters = {}) {
   };
 }
 
-function ensureFutureSlots() {
-  const db = readDb();
+async function ensureFutureSlots() {
+  const db = await readDb();
   const salonIds = new Set(db.salons.map((item) => item.id));
   let changed = false;
 
@@ -344,7 +431,7 @@ function ensureFutureSlots() {
     return keep;
   });
 
-  if (changed) writeDb(db);
+  if (changed) await writeDb(db);
 }
 
 function getProvinces() {
@@ -437,7 +524,7 @@ function bookingSummaryText(booking) {
     `Tarih: ${booking.date || '-'} ${booking.startTime || ''}`.trim(),
     `Durum: ${booking.status || '-'}`,
     booking.notes ? `Not: ${booking.notes}` : ''
-  ].filter(Boolean).join('\\n');
+  ].filter(Boolean).join('\n');
 }
 
 async function sendBookingCreatedMails(db, booking) {
@@ -520,23 +607,10 @@ ${summary}`
 }
 
 function serveStatic(req, res, pathname) {
-  const normalized = pathname === '/' ? 'index.html' : String(pathname).replace(/^\/+/, '');
-
-  const candidates = [
-    path.join(PUBLIC_DIR, normalized),
-    path.join(ROOT, normalized)
-  ];
-
-  let filePath = candidates.find((candidate) => candidate.startsWith(ROOT) && fs.existsSync(candidate));
-
-  if (!filePath) return notFound(res);
-
-  if (fs.statSync(filePath).isDirectory()) {
-    const indexCandidate = path.join(filePath, 'index.html');
-    if (!fs.existsSync(indexCandidate)) return notFound(res);
-    filePath = indexCandidate;
-  }
-
+  let filePath = path.join(PUBLIC_DIR, pathname === '/' ? 'index.html' : pathname);
+  if (!filePath.startsWith(PUBLIC_DIR)) return notFound(res);
+  if (!fs.existsSync(filePath)) return notFound(res);
+  if (fs.statSync(filePath).isDirectory()) filePath = path.join(filePath, 'index.html');
   const ext = path.extname(filePath).toLowerCase();
   const contentType = mimeTypes[ext] || 'application/octet-stream';
   res.writeHead(200, { 'Content-Type': contentType });
@@ -545,7 +619,7 @@ function serveStatic(req, res, pathname) {
 
 async function handleApi(req, res, url) {
   const pathname = url.pathname;
-  const db = readDb();
+  const db = await readDb();
 
   if (req.method === 'GET' && pathname === '/api/health') {
     return json(res, 200, { ok: true, app: 'randevumhazır', cities: PROVINCES.map((item) => item.name), time: nowIso() });
@@ -603,12 +677,12 @@ async function handleApi(req, res, url) {
       name: String(body.name).trim(),
       email,
       phone: String(body.phone || '').trim(),
-      password: String(body.password),
+      password: hashPassword(String(body.password)),
       createdAt,
       ...(role === 'partner' ? { billing: { trialStartedAt: createdAt, trialEndsAt: addDaysToIso(createdAt, 2), activePlan: null, planStartedAt: null, planEndsAt: null, lastPaymentId: null } } : {})
     };
     db.users.push(user);
-    writeDb(db);
+    await writeDb(db);
     return json(res, 201, { user: publicUser(user) });
   }
 
@@ -617,9 +691,78 @@ async function handleApi(req, res, url) {
     const email = String(body.email || '').trim().toLowerCase();
     const password = String(body.password || '');
     const role = String(body.role || '');
-    const user = db.users.find((item) => item.email === email && item.password === password && (!role || item.role === role));
-    if (!user) return json(res, 401, { error: 'E-posta, şifre veya rol hatalı.' });
+    const user = db.users.find((item) => item.email === email && (!role || item.role === role));
+    if (!user || !verifyPassword(user.password, password)) return json(res, 401, { error: 'E-posta, şifre veya rol hatalı.' });
+    if (!String(user.password || '').startsWith('pbkdf2$')) {
+      user.password = hashPassword(password);
+      await writeDb(db);
+    }
     return json(res, 200, { user: publicUser(user) });
+  }
+
+  if (req.method === 'POST' && pathname === '/api/auth/forgot-password') {
+    const body = await readBody(req);
+    const email = String(body.email || '').trim().toLowerCase();
+    const role = String(body.role || '').trim();
+    if (!email) return json(res, 400, { error: 'E-posta adresi zorunlu.' });
+
+    db.passwordResets = (db.passwordResets || []).filter((item) => !item.expiresAt || new Date(item.expiresAt).getTime() > Date.now());
+    const user = db.users.find((item) => item.email === email && (!role || item.role === role));
+
+    let devResetUrl = null;
+    if (user) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const reset = {
+        id: uid('reset'),
+        userId: user.id,
+        tokenHash: hashResetToken(token),
+        expiresAt: addMinutesToIso(null, 45),
+        usedAt: null,
+        createdAt: nowIso()
+      };
+      db.passwordResets.push(reset);
+      await writeDb(db);
+
+      const resetUrl = publicBaseUrl(req) + '/reset-password.html?token=' + encodeURIComponent(token);
+      devResetUrl = resetUrl;
+      await sendAppMail({
+        to: user.email,
+        subject: 'Randevumhazır şifre yenileme bağlantısı',
+        text: 'Şifreni yenilemek için bu linke tıkla:\n\n' + resetUrl + '\n\nBu link 45 dakika geçerlidir.'
+      });
+    }
+
+    return json(res, 200, {
+      ok: true,
+      message: 'Eğer bu e-posta sistemde kayıtlıysa şifre yenileme linki gönderildi.',
+      ...(process.env.NODE_ENV !== 'production' && devResetUrl ? { devResetUrl } : {})
+    });
+  }
+
+  if (req.method === 'POST' && pathname === '/api/auth/reset-password') {
+    const body = await readBody(req);
+    const token = String(body.token || '').trim();
+    const password = String(body.password || '');
+    if (!token || password.length < 6) return json(res, 400, { error: 'Token ve en az 6 karakter yeni şifre zorunlu.' });
+
+    const tokenHash = hashResetToken(token);
+    const reset = (db.passwordResets || []).find((item) => item.tokenHash === tokenHash && !item.usedAt && new Date(item.expiresAt).getTime() > Date.now());
+    if (!reset) return json(res, 400, { error: 'Şifre yenileme linki geçersiz veya süresi dolmuş.' });
+
+    const user = db.users.find((item) => item.id === reset.userId);
+    if (!user) return json(res, 404, { error: 'Kullanıcı bulunamadı.' });
+
+    user.password = hashPassword(password);
+    reset.usedAt = nowIso();
+    await writeDb(db);
+
+    await sendAppMail({
+      to: user.email,
+      subject: 'Randevumhazır şifren değiştirildi',
+      text: 'Randevumhazır hesabının şifresi başarıyla değiştirildi. Bu işlemi sen yapmadıysan hemen bizimle iletişime geç.'
+    });
+
+    return json(res, 200, { ok: true, message: 'Şifren değiştirildi. Yeni şifrenle giriş yapabilirsin.' });
   }
 
   if (req.method === 'POST' && pathname === '/api/partner/subscribe') {
@@ -652,7 +795,7 @@ async function handleApi(req, res, url) {
     partner.billing.lastPaymentId = payment.id;
 
     db.payments.push(payment);
-    writeDb(db);
+    await writeDb(db);
 
     return json(res, 201, {
       data: {
@@ -756,7 +899,7 @@ async function handleApi(req, res, url) {
 
     slot.status = 'booked';
     db.bookings.push(booking);
-    writeDb(db);
+    await writeDb(db);
     await sendBookingCreatedMails(db, booking);
     return json(res, 201, { data: booking });
   }
@@ -783,7 +926,7 @@ async function handleApi(req, res, url) {
       slot.status = status === 'rejected' ? 'open' : 'booked';
     }
 
-    writeDb(db);
+    await writeDb(db);
     await sendBookingStatusMails(db, booking);
     return json(res, 200, { data: booking });
   }
@@ -840,7 +983,7 @@ async function handleApi(req, res, url) {
       db.salons.push(salon);
     }
 
-    writeDb(db);
+    await writeDb(db);
     return json(res, 200, { data: salon });
   }
 
@@ -865,7 +1008,7 @@ async function handleApi(req, res, url) {
     if (!isMeaningfulLabel(service.name) || !isMeaningfulLabel(service.category)) return json(res, 400, { error: 'Hizmet adı ve kategori sayı gibi görünemez.' });
     db.services.push(service);
     if (!salon.categories.includes(service.category)) salon.categories.push(service.category);
-    writeDb(db);
+    await writeDb(db);
     return json(res, 201, { data: service });
   }
 
@@ -886,7 +1029,7 @@ async function handleApi(req, res, url) {
     };
     if (!staff.name) return json(res, 400, { error: 'Uzman adı zorunlu.' });
     db.staff.push(staff);
-    writeDb(db);
+    await writeDb(db);
     return json(res, 201, { data: staff });
   }
 
@@ -915,7 +1058,7 @@ async function handleApi(req, res, url) {
     if (!slot.date || !slot.startTime) return json(res, 400, { error: 'Tarih ve saat zorunlu.' });
     if (slot.date < nextDate(0)) return json(res, 400, { error: 'Geçmiş gün için saat açılamaz.' });
     db.slots.push(slot);
-    writeDb(db);
+    await writeDb(db);
     return json(res, 201, { data: slot });
   }
 
@@ -986,7 +1129,7 @@ async function handleApi(req, res, url) {
     if (!salon) return json(res, 404, { error: 'Salon bulunamadı.' });
     if (typeof body.isFeatured === 'boolean') salon.isFeatured = body.isFeatured;
     if (body.status) salon.status = body.status;
-    writeDb(db);
+    await writeDb(db);
     return json(res, 200, { data: salon });
   }
 
@@ -1011,9 +1154,14 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-ensureDataFiles();
-ensureFutureSlots();
-
-server.listen(PORT, () => {
-  console.log(`randevumhazır running at http://localhost:${PORT}`);
+(async () => {
+  ensureDataFiles();
+  await ensureFutureSlots();
+  server.listen(PORT, () => {
+    const dbMode = usePostgres() ? 'PostgreSQL/Supabase' : 'local JSON';
+    console.log(`randevumhazır running at http://localhost:${PORT} (${dbMode})`);
+  });
+})().catch((error) => {
+  console.error('STARTUP ERROR:', error);
+  process.exit(1);
 });
