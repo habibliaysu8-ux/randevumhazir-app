@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=forgot-flow-v4" />
+  <link rel="stylesheet" href="/styles.css?v=legal-v1" />
 </head>
 <body class="panel-body">
   <div class="app-shell">
@@ -57,6 +57,7 @@
               <div class="field"><label>Telefon</label><input id="partnerRegisterPhone" type="tel" placeholder="05xx xxx xx xx" autocomplete="off" /></div>
               <div class="field"><label>E-posta</label><input id="partnerRegisterEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" /></div>
               <div class="field"><label>Şifre</label><input id="partnerRegisterPassword" type="password" placeholder="En az 6 karakter" autocomplete="new-password" /></div>
+              <label class="legal-consent"><input id="partnerLegalConsent" type="checkbox" /> <span><a href="/partner-sozlesmesi.html" target="_blank">Partner Sözleşmesi</a>, <a href="/kullanici-sozlesmesi.html" target="_blank">Kullanıcı Sözleşmesi</a> ve <a href="/kvkk.html" target="_blank">KVKK Aydınlatma Metni</a>’ni okudum.</span></label>
               <button id="partnerRegisterBtn" class="button soft full">Partner hesabı oluştur</button>
             </div>
           </section>
@@ -175,11 +176,21 @@
     </div>
   </div>
 
+
+  <footer class="site-legal-footer container">
+    <a href="/kvkk.html">KVKK Aydınlatma Metni</a>
+    <a href="/gizlilik-politikasi.html">Gizlilik Politikası</a>
+    <a href="/kullanici-sozlesmesi.html">Kullanıcı Sözleşmesi</a>
+    <a href="/partner-sozlesmesi.html">Partner Sözleşmesi</a>
+    <a href="/iptal-iade-politikasi.html">İptal ve İade Politikası</a>
+    <a href="mailto:destek@randevumhazir.online">İletişim</a>
+  </footer>
+
   <div class="toast" id="toast"></div>
 
-  <script src="/shared.js?v=forgot-flow-v4"></script>
-  <script src="/partner.js?v=forgot-flow-v4"></script>
-<!-- forgot-flow-v4-fallback -->
+  <script src="/shared.js?v=legal-v1"></script>
+  <script src="/partner.js?v=legal-v1"></script>
+<!-- legal-v1-fallback -->
 <script>
 (function () {
   const forgotMap = {

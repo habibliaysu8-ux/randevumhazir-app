@@ -1,0 +1,16 @@
+Randevumhazır hukuki metinler eklendi.
+
+Eklenen sayfalar:
+- /kvkk.html
+- /gizlilik-politikasi.html
+- /kullanici-sozlesmesi.html
+- /partner-sozlesmesi.html
+- /iptal-iade-politikasi.html
+
+Eklenenler:
+- Ana site, partner paneli, admin paneli ve mobile app footer linkleri
+- Müşteri kayıt formuna KVKK + Kullanıcı Sözleşmesi checkbox
+- Partner kayıt formuna Partner Sözleşmesi + Kullanıcı Sözleşmesi + KVKK checkbox
+- Mobile müşteri kayıt formuna KVKK + Kullanıcı Sözleşmesi checkbox
+
+Canlı yayına ve ödeme almaya geçmeden önce şirket unvanı, adres, vergi/MERSİS bilgisi, destek e-postası ve ödeme kuruluşu bilgileri güncellenmelidir. Avukat/muhasebeci kontrolü önerilir.

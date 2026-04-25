@@ -381,6 +381,8 @@ function openAuth(mode = 'login') {
   $('authSwitchText').textContent = reg ? 'Zaten hesabın var mı?' : 'Hesabın yok mu?';
   $('toggleAuth').textContent = reg ? 'Giriş yap' : 'Kayıt ol';
   $('forgotBtn').classList.toggle('hidden', reg);
+  $('mobileLegalConsentWrap')?.classList.toggle('hidden', !reg);
+  if ($('mobileLegalConsent')) $('mobileLegalConsent').checked = false;
   $('mobileForgotBox')?.classList.add('hidden');
   if ($('mobileForgotMessage')) $('mobileForgotMessage').textContent = '';
   ['nameField', 'phoneField'].forEach((id) => $(id).classList.toggle('hidden', !reg));
@@ -394,6 +396,7 @@ $('authForm').onsubmit = async (e) => {
   e.preventDefault();
   const reg = state.authMode === 'register';
   const payload = { role: 'customer', email: $('emailField').value.trim(), password: $('passwordField').value };
+  if (reg && $('mobileLegalConsent') && !$('mobileLegalConsent').checked) { $('authError').textContent = 'Kayıt için Kullanıcı Sözleşmesi ve KVKK Aydınlatma Metni onayı gerekir.'; return; }
   if (reg) { payload.name = $('nameField').value.trim(); payload.phone = $('phoneField').value.trim(); }
   try {
     const data = await api(reg ? '/api/auth/register' : '/api/auth/login', { method: 'POST', body: JSON.stringify(payload) });

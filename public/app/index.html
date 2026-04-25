@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Randevumhazır App</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="styles.css?v=forgot-flow-v4" />
+  <link rel="stylesheet" href="styles.css?v=legal-v1" />
 </head>
 <body>
   <div class="app-shell">
@@ -79,6 +79,7 @@
       <input id="emailField" type="email" name="email_blank_9382" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="E-posta" value="" />
       <input id="phoneField" class="hidden" name="phone_blank_9382" autocomplete="off" inputmode="tel" autocorrect="off" spellcheck="false" placeholder="Telefon" value="" />
       <input id="passwordField" type="password" name="pass_blank_9382" autocomplete="new-password" placeholder="Şifre" value="" />
+      <label id="mobileLegalConsentWrap" class="mobile-legal-consent hidden"><input id="mobileLegalConsent" type="checkbox" /> <span><a href="/kullanici-sozlesmesi.html" target="_blank">Kullanıcı Sözleşmesi</a> ve <a href="/kvkk.html" target="_blank">KVKK Aydınlatma Metni</a>’ni okudum.</span></label>
       <button class="primary-btn" id="submitAuth" type="submit">Giriş yap</button>
       <button class="link-btn forgot-link" id="forgotBtn" type="button">Şifremi unuttum</button>
       <div id="mobileForgotBox" class="forgot-password-box hidden">
@@ -112,7 +113,13 @@
     </div>
   </div>
 
+  <footer class="mobile-legal-footer">
+    <a href="/kvkk.html">KVKK</a>
+    <a href="/gizlilik-politikasi.html">Gizlilik</a>
+    <a href="/kullanici-sozlesmesi.html">Sözleşme</a>
+    <a href="/iptal-iade-politikasi.html">İptal/İade</a>
+  </footer>
   <div class="toast" id="toast"></div>
-  <script src="app.js?v=forgot-flow-v4"></script>
+  <script src="app.js?v=legal-v1"></script>
 </body>
 </html>

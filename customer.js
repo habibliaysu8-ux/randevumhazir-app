@@ -613,6 +613,9 @@ async function sendCustomerForgotPassword() {
 }
 
 async function registerCustomer() {
+  if (byId('customerLegalConsent') && !byId('customerLegalConsent').checked) {
+    throw new Error('Kayıt için Kullanıcı Sözleşmesi ve KVKK Aydınlatma Metni onayı gerekir.');
+  }
   const name = byId('registerName').value.trim();
   const phone = byId('registerPhone').value.trim();
   const email = byId('registerEmail').value.trim();

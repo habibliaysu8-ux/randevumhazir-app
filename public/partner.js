@@ -433,6 +433,9 @@ async function sendPartnerForgotPassword() {
 }
 
 async function registerPartner() {
+  if (byId('partnerLegalConsent') && !byId('partnerLegalConsent').checked) {
+    throw new Error('Partner kaydı için Partner Sözleşmesi ve KVKK Aydınlatma Metni onayı gerekir.');
+  }
   const name = byId('partnerRegisterName').value.trim();
   const phone = byId('partnerRegisterPhone').value.trim();
   const email = byId('partnerRegisterEmail').value.trim();
