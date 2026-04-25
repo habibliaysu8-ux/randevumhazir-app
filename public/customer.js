@@ -562,12 +562,12 @@ async function loginCustomer() {
     setInlineFeedback('loginInlineFeedback', 'E-posta alanını doldur.');
     return;
   }
-  if (!password) {
-    setInlineFeedback('loginInlineFeedback', 'Şifre alanını doldur.');
-    return;
-  }
   if (!isValidEmail(email)) {
     setInlineFeedback('loginInlineFeedback', 'Geçerli bir e-posta adresi yaz.');
+    return;
+  }
+  if (!password) {
+    setInlineFeedback('loginInlineFeedback', 'Şifre alanını doldur.');
     return;
   }
 

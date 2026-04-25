@@ -2460,9 +2460,9 @@ body.fresha-inspired-body {
 }
 
 .legal-consent-row input {
-  width: 18px;
-  height: 18px;
-  margin-top: 1px;
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
   flex: 0 0 auto;
 }
 
@@ -2538,21 +2538,19 @@ body.fresha-inspired-body {
 
 .inline-feedback {
   display: block;
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  font-size: 13px;
-  line-height: 1.45;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .inline-feedback.error {
-  background: rgba(181, 61, 86, 0.12);
-  color: #8e2338;
-  border: 1px solid rgba(181, 61, 86, 0.18);
+  color: #b53d56;
 }
 
 .inline-feedback.success {
-  background: rgba(42, 113, 72, 0.10);
   color: #215d3b;
-  border: 1px solid rgba(42, 113, 72, 0.18);
 }
