@@ -360,8 +360,17 @@ function showView(view) {
   document.querySelectorAll('.bottom-nav button').forEach((b) => b.classList.toggle('active', b.dataset.tab === view || (view === 'detail' && b.dataset.tab === 'home') || (view === 'bookings' && b.dataset.tab === 'bookings')));
 }
 
+function resetMobileForgotPassword() {
+  const box = $('mobileForgotBox'); const input = $('mobileForgotEmail'); const message = $('mobileForgotMessage'); const sendBtn = $('mobileForgotSendBtn');
+  if (input) { input.value = ''; input.hidden = false; }
+  if (message) { message.textContent = ''; message.style.color = ''; }
+  if (sendBtn) { sendBtn.hidden = false; sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
+  if (box) box.classList.add('hidden');
+}
+
 function clearAuthInputs() {
   ['nameField', 'emailField', 'phoneField', 'passwordField'].forEach((id) => { $(id).value = ''; });
+  resetMobileForgotPassword();
 }
 
 function openAuth(mode = 'login') {
@@ -372,6 +381,8 @@ function openAuth(mode = 'login') {
   $('authSwitchText').textContent = reg ? 'Zaten hesabın var mı?' : 'Hesabın yok mu?';
   $('toggleAuth').textContent = reg ? 'Giriş yap' : 'Kayıt ol';
   $('forgotBtn').classList.toggle('hidden', reg);
+  $('mobileForgotBox')?.classList.add('hidden');
+  if ($('mobileForgotMessage')) $('mobileForgotMessage').textContent = '';
   ['nameField', 'phoneField'].forEach((id) => $(id).classList.toggle('hidden', !reg));
   $('authError').textContent = '';
   clearAuthInputs();
@@ -396,19 +407,47 @@ $('authForm').onsubmit = async (e) => {
 };
 
 $('toggleAuth').onclick = () => openAuth(state.authMode === 'login' ? 'register' : 'login');
-$('forgotBtn').onclick = async () => {
-  const email = $('emailField').value.trim();
-  if (!email) { $('authError').textContent = 'Önce e-posta adresini yaz.'; return; }
+$('forgotBtn').onclick = () => {
+  $('mobileForgotBox').classList.remove('hidden');
+  $('mobileForgotEmail').hidden = false;
+  $('mobileForgotSendBtn').hidden = false;
+  $('mobileForgotSendBtn').disabled = false;
+  $('mobileForgotSendBtn').textContent = 'Gönder';
+  $('mobileForgotEmail').value = $('emailField').value.trim() || '';
+  $('mobileForgotMessage').textContent = '';
+  $('mobileForgotMessage').style.color = '';
+  setTimeout(() => $('mobileForgotEmail').focus(), 0);
+};
+$('mobileForgotSendBtn').onclick = async () => {
+  const email = ($('mobileForgotEmail').value || $('emailField').value || '').trim();
+  if (!email) {
+    $('mobileForgotMessage').style.color = '#b42318';
+    $('mobileForgotMessage').textContent = 'Mail adresini yaz.';
+    return;
+  }
+  $('mobileForgotMessage').style.color = '';
+  $('mobileForgotMessage').textContent = '';
+  $('mobileForgotSendBtn').disabled = true;
+  $('mobileForgotSendBtn').textContent = 'Gönderiliyor...';
   try {
-    const data = await api('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email, role: 'customer' }) });
-    $('authError').textContent = data.message || 'Şifre yenileme linki mail adresine gönderildi.';
-    if (data.devResetUrl) console.log('Şifre yenileme linki:', data.devResetUrl);
+    await api('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email, role: 'customer' }) });
+    $('mobileForgotEmail').value = '';
+    $('emailField').value = '';
+    $('passwordField').value = '';
+    $('mobileForgotEmail').hidden = true;
+    $('mobileForgotSendBtn').hidden = true;
+    $('mobileForgotMessage').style.color = '#256b3a';
+    $('mobileForgotMessage').textContent = 'Şifre yenilemek için mailinizi kontrol edin.';
   } catch (err) {
-    $('authError').textContent = err.message;
+    $('mobileForgotMessage').style.color = '#b42318';
+    $('mobileForgotMessage').textContent = err.message;
+    $('mobileForgotSendBtn').disabled = false;
+    $('mobileForgotSendBtn').textContent = 'Gönder';
   }
 };
 $('authBtn').onclick = () => state.user ? showView('account') : openAuth('login');
-$('closeAuth').onclick = () => $('authModal').close();
+$('authModal').addEventListener('close', clearAuthInputs);
+$('closeAuth').onclick = () => { clearAuthInputs(); $('authModal').close(); };
 $('logoutBtn').onclick = () => { setUser(null); toast('Çıkış yapıldı'); showView('home'); };
 $('searchInput').addEventListener('focus', () => keepPageStill(() => renderServiceDropdown(true)));
 $('searchInput').addEventListener('input', () => keepPageStill(() => renderServiceDropdown(true)));

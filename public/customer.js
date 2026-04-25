@@ -9,11 +9,13 @@ const customerState = {
 };
 
 function openModal(id) {
+  if (id === 'authModal') resetCustomerAuthForm();
   byId(id)?.classList.add('open');
 }
 
 function closeModal(id) {
   byId(id)?.classList.remove('open');
+  if (id === 'authModal') resetCustomerAuthForm();
 }
 
 function looksNumeric(value) {
@@ -241,7 +243,7 @@ function attachModalEvents() {
   });
   document.querySelectorAll('.modal').forEach((modal) => {
     modal.addEventListener('click', (event) => {
-      if (event.target === modal) modal.classList.remove('open');
+      if (event.target === modal) closeModal(modal.id);
     });
   });
 }
@@ -541,18 +543,73 @@ async function loginCustomer() {
   if (customerState.selectedSlot) openModal('bookingModal');
 }
 
-async function sendCustomerForgotPassword() {
-  const email = byId('loginEmail').value.trim();
+function resetCustomerForgotPassword() {
+  const box = byId('customerForgotBox');
+  const input = byId('customerForgotEmail');
   const message = byId('customerForgotMessage');
-  if (message) message.textContent = '';
+  const sendBtn = byId('customerForgotSendBtn');
+  const field = input?.closest('.field');
+  if (input) input.value = '';
+  if (message) { message.textContent = ''; message.style.color = ''; }
+  if (field) field.hidden = false;
+  if (sendBtn) { sendBtn.hidden = false; sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
+  if (box) { box.hidden = true; box.style.display = ''; }
+}
+
+function resetCustomerAuthForm() {
+  ['loginEmail', 'loginPassword', 'registerName', 'registerPhone', 'registerEmail', 'registerPassword'].forEach((id) => {
+    const el = byId(id);
+    if (el) el.value = '';
+  });
+  resetCustomerForgotPassword();
+}
+
+function openCustomerForgotPassword() {
+  const box = byId('customerForgotBox');
+  const input = byId('customerForgotEmail');
+  const loginEmail = byId('loginEmail');
+  const message = byId('customerForgotMessage');
+  const sendBtn = byId('customerForgotSendBtn');
+  const field = input?.closest('.field');
+  if (!box) return;
+  if (field) field.hidden = false;
+  if (sendBtn) { sendBtn.hidden = false; sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
+  box.hidden = false;
+  box.style.display = 'grid';
+  if (input) input.value = loginEmail?.value.trim() || '';
+  if (message) { message.textContent = ''; message.style.color = ''; }
+  setTimeout(() => input?.focus(), 0);
+}
+
+async function sendCustomerForgotPassword() {
+  const input = byId('customerForgotEmail');
+  const email = (input?.value || byId('loginEmail')?.value || '').trim();
+  const message = byId('customerForgotMessage');
+  const sendBtn = byId('customerForgotSendBtn');
+  const field = input?.closest('.field');
+  if (message) { message.textContent = ''; message.style.color = ''; }
   if (!email) {
-    if (message) message.textContent = 'Önce e-posta adresini yaz.';
-    showToast('Önce e-posta adresini yaz.', 'error');
+    if (message) { message.textContent = 'Mail adresini yaz.'; message.style.color = '#b42318'; }
+    showToast('Mail adresini yaz.', 'error');
+    input?.focus();
     return;
   }
-  const data = await API.post('/api/auth/forgot-password', { email, role: 'customer' });
-  if (message) message.textContent = data.message || 'Şifre yenileme linki mail adresine gönderildi.';
-  showToast('Şifre yenileme maili gönderildi.', 'success');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Gönderiliyor...'; }
+  try {
+    await API.post('/api/auth/forgot-password', { email, role: 'customer' });
+    if (input) input.value = '';
+    if (byId('loginEmail')) byId('loginEmail').value = '';
+    if (byId('loginPassword')) byId('loginPassword').value = '';
+    if (field) field.hidden = true;
+    if (sendBtn) sendBtn.hidden = true;
+    if (message) { message.textContent = 'Şifre yenilemek için mailinizi kontrol edin.'; message.style.color = '#256b3a'; }
+    showToast('Şifre yenileme maili gönderildi.', 'success');
+  } catch (error) {
+    if (message) { message.textContent = error.message || 'Mail gönderilemedi.'; message.style.color = '#b42318'; }
+    throw error;
+  } finally {
+    if (sendBtn && !sendBtn.hidden) { sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
+  }
 }
 
 async function registerCustomer() {
@@ -629,6 +686,7 @@ function setupAuthTabs() {
   if (!tabs.length || !panels.length) return;
 
   const setActive = (name) => {
+    if (name !== 'login') resetCustomerForgotPassword();
     tabs.forEach((tab) => {
       tab.classList.toggle('active', tab.dataset.authTab === name);
     });
@@ -652,7 +710,8 @@ function setupAuthTabs() {
 function bindEvents() {
   byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error')));
   byId('loginBtn').addEventListener('click', () => loginCustomer().catch((error) => showToast(error.message, 'error')));
-  byId('customerForgotBtn')?.addEventListener('click', () => sendCustomerForgotPassword().catch((error) => showToast(error.message, 'error')));
+  byId('customerForgotBtn')?.addEventListener('click', openCustomerForgotPassword);
+  byId('customerForgotSendBtn')?.addEventListener('click', () => sendCustomerForgotPassword().catch((error) => showToast(error.message, 'error')));
   byId('registerBtn').addEventListener('click', () => registerCustomer().catch((error) => showToast(error.message, 'error')));
   byId('confirmBookingBtn').addEventListener('click', () => confirmBooking().catch((error) => showToast(error.message, 'error')));
 

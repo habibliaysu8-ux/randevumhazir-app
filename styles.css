@@ -2453,6 +2453,39 @@ body.fresha-inspired-body {
   padding: 0;
 }
 
+.forgot-toggle {
+  align-self: center;
+  cursor: pointer;
+}
+
+.forgot-password-box {
+  border: 1px solid rgba(31, 25, 39, 0.1);
+  background: #faf9ff;
+  border-radius: 22px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.forgot-password-box[hidden] {
+  display: none !important;
+}
+
+.forgot-password-box .button {
+  min-height: 46px;
+}
+
+.forgot-password-box .auth-panel-note {
+  margin-top: 0;
+  color: #256b3a;
+  font-weight: 700;
+}
+
+.forgot-password-box .button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   #authModal {
     align-items: flex-end;

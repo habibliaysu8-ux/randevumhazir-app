@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=forgot-flow-v4" />
 </head>
 <body class="panel-body">
   <div class="app-shell">
@@ -38,8 +38,12 @@
               <div class="field"><label>E-posta</label><input id="adminEmail" type="email" placeholder="admin e-postası" /></div>
               <div class="field"><label>Şifre</label><input id="adminPassword" type="password" placeholder="••••••••" /></div>
               <button id="adminLoginBtn" class="button dark full">Admin girişi</button>
-              <button id="adminForgotBtn" type="button" class="auth-link-btn">Şifremi unuttum</button>
-              <p id="adminForgotMessage" class="auth-panel-note" aria-live="polite"></p>
+              <button id="adminForgotBtn" type="button" class="auth-link-btn forgot-toggle">Şifremi unuttum</button>
+              <div id="adminForgotBox" class="forgot-password-box" hidden>
+                <div class="field"><label>Şifre yenileme e-postası</label><input id="adminForgotEmail" type="email" placeholder="admin mail adresi" autocomplete="off" /></div>
+                <button id="adminForgotSendBtn" type="button" class="button soft full">Gönder</button>
+                <p id="adminForgotMessage" class="auth-panel-note" aria-live="polite"></p>
+              </div>
             </div>
           </div>
         </aside>
@@ -73,7 +77,66 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="/shared.js"></script>
-  <script src="/admin.js"></script>
+  <script src="/shared.js?v=forgot-flow-v4"></script>
+  <script src="/admin.js?v=forgot-flow-v4"></script>
+<!-- forgot-flow-v4-fallback -->
+<script>
+(function () {
+  const forgotMap = {
+    customerForgotBtn: { box: 'customerForgotBox', input: 'customerForgotEmail', login: 'loginEmail', password: 'loginPassword', message: 'customerForgotMessage', send: 'customerForgotSendBtn', role: 'customer' },
+    partnerForgotBtn: { box: 'partnerForgotBox', input: 'partnerForgotEmail', login: 'partnerLoginEmail', password: 'partnerLoginPassword', message: 'partnerForgotMessage', send: 'partnerForgotSendBtn', role: 'partner' },
+    adminForgotBtn: { box: 'adminForgotBox', input: 'adminForgotEmail', login: 'adminEmail', password: 'adminPassword', message: 'adminForgotMessage', send: 'adminForgotSendBtn', role: 'admin' }
+  };
+  const sendMap = Object.fromEntries(Object.values(forgotMap).map((cfg) => [cfg.send, cfg]));
+  const $ = (id) => document.getElementById(id);
+  function inputField(cfg) { const input = $(cfg.input); return input ? input.closest('.field') : null; }
+  function clearValues(cfg) {
+    const input = $(cfg.input); const login = $(cfg.login); const password = $(cfg.password);
+    if (input) input.value = ''; if (login) login.value = ''; if (password) password.value = '';
+  }
+  function showBox(cfg) {
+    const box = $(cfg.box); const input = $(cfg.input); const login = $(cfg.login); const msg = $(cfg.message);
+    const field = inputField(cfg); const sendBtn = $(cfg.send);
+    if (!box) return;
+    if (field) field.hidden = false;
+    if (sendBtn) { sendBtn.hidden = false; sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
+    box.hidden = false; box.style.display = 'grid';
+    if (input) input.value = login && login.value.trim() ? login.value.trim() : '';
+    if (msg) { msg.textContent = ''; msg.style.color = '#256b3a'; }
+    setTimeout(() => input && input.focus(), 0);
+  }
+  function successBox(cfg) {
+    const box = $(cfg.box); const msg = $(cfg.message); const field = inputField(cfg); const sendBtn = $(cfg.send);
+    if (box) { box.hidden = false; box.style.display = 'grid'; }
+    if (field) field.hidden = true;
+    if (sendBtn) sendBtn.hidden = true;
+    clearValues(cfg);
+    if (msg) { msg.textContent = 'Şifre yenilemek için mailinizi kontrol edin.'; msg.style.color = '#256b3a'; }
+  }
+  async function sendForgot(cfg) {
+    const input = $(cfg.input); const login = $(cfg.login); const msg = $(cfg.message); const btn = $(cfg.send);
+    const email = ((input && input.value) || (login && login.value) || '').trim();
+    if (msg) { msg.textContent = ''; msg.style.color = '#256b3a'; }
+    if (!email) { if (msg) { msg.textContent = 'Mail adresini yaz.'; msg.style.color = '#b42318'; } if (input) input.focus(); return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Gönderiliyor...'; }
+    try {
+      const res = await fetch('/api/auth/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, role: cfg.role }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Mail gönderilemedi.');
+      successBox(cfg);
+    } catch (err) {
+      if (msg) { msg.textContent = err.message || 'Mail gönderilemedi.'; msg.style.color = '#b42318'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Gönder'; }
+    }
+  }
+  document.addEventListener('click', function (event) {
+    const btn = event.target.closest('button');
+    if (!btn) return;
+    if (forgotMap[btn.id]) { event.preventDefault(); event.stopImmediatePropagation(); showBox(forgotMap[btn.id]); }
+    if (sendMap[btn.id]) { event.preventDefault(); event.stopImmediatePropagation(); sendForgot(sendMap[btn.id]); }
+  }, true);
+})();
+</script>
+
 </body>
 </html>

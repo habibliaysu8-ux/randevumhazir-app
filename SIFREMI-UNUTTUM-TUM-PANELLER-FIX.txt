@@ -1,0 +1,13 @@
+Şifremi unuttum akışı güncellendi.
+
+Yapılanlar:
+- Müşteri paneli: Gönder sonrası mail kutusu ve Gönder butonu kapanır, alanlar temizlenir.
+- Partner paneli: Aynı akış eklendi.
+- Admin paneli: Aynı akış eklendi.
+- Mobile app: Aynı akış eklendi.
+- Giriş/şifre alanları geri dönünce boş gelsin diye temizleme eklendi.
+
+GitHub commit mesajı önerisi:
+fix forgot password flow all panels
+
+Yükledikten sonra Render deploy bitince Command + Shift + R ile sert yenile.

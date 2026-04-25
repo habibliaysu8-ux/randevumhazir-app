@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Randevumhazır App</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="styles.css?v=gercek5-20260424" />
+  <link rel="stylesheet" href="styles.css?v=forgot-flow-v4" />
 </head>
 <body>
   <div class="app-shell">
@@ -81,6 +81,11 @@
       <input id="passwordField" type="password" name="pass_blank_9382" autocomplete="new-password" placeholder="Şifre" value="" />
       <button class="primary-btn" id="submitAuth" type="submit">Giriş yap</button>
       <button class="link-btn forgot-link" id="forgotBtn" type="button">Şifremi unuttum</button>
+      <div id="mobileForgotBox" class="forgot-password-box hidden">
+        <input id="mobileForgotEmail" type="email" placeholder="Mail adresini yaz" autocomplete="off" />
+        <button id="mobileForgotSendBtn" class="primary-btn" type="button">Gönder</button>
+        <p id="mobileForgotMessage" class="auth-panel-note"></p>
+      </div>
       <p class="auth-panel-note" id="authSwitchNote"><span id="authSwitchText">Hesabın yok mu?</span> <button class="auth-link-btn" id="toggleAuth" type="button">Kayıt ol</button></p>
       <p class="error" id="authError"></p>
     </form>
@@ -108,6 +113,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="app.js?v=gercek5-20260424"></script>
+  <script src="app.js?v=forgot-flow-v4"></script>
 </body>
 </html>

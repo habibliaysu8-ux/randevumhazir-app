@@ -21,12 +21,19 @@ function escapeHtml(value) {
 }
 
 function clearPartnerAuthInputs() {
-  ['partnerLoginEmail', 'partnerLoginPassword', 'partnerRegisterName', 'partnerRegisterPhone', 'partnerRegisterEmail', 'partnerRegisterPassword'].forEach((id) => {
+  ['partnerLoginEmail', 'partnerLoginPassword', 'partnerRegisterName', 'partnerRegisterPhone', 'partnerRegisterEmail', 'partnerRegisterPassword', 'partnerForgotEmail'].forEach((id) => {
     const el = byId(id);
     if (el) el.value = '';
   });
   const forgotMessage = byId('partnerForgotMessage');
-  if (forgotMessage) forgotMessage.textContent = '';
+  const forgotBox = byId('partnerForgotBox');
+  const forgotInput = byId('partnerForgotEmail');
+  const forgotSendBtn = byId('partnerForgotSendBtn');
+  const forgotField = forgotInput?.closest('.field');
+  if (forgotMessage) { forgotMessage.textContent = ''; forgotMessage.style.color = ''; }
+  if (forgotField) forgotField.hidden = false;
+  if (forgotSendBtn) { forgotSendBtn.hidden = false; forgotSendBtn.disabled = false; forgotSendBtn.textContent = 'Gönder'; }
+  if (forgotBox) { forgotBox.hidden = true; forgotBox.style.display = ''; }
 }
 
 function clearPaymentInputs() {
@@ -377,18 +384,52 @@ async function loginPartner() {
   showToast('Partner girişi başarılı.', 'success');
 }
 
-async function sendPartnerForgotPassword() {
-  const email = byId('partnerLoginEmail').value.trim();
+function openPartnerForgotPassword() {
+  const box = byId('partnerForgotBox');
+  const input = byId('partnerForgotEmail');
+  const loginEmail = byId('partnerLoginEmail');
   const message = byId('partnerForgotMessage');
-  if (message) message.textContent = '';
+  const sendBtn = byId('partnerForgotSendBtn');
+  const field = input?.closest('.field');
+  if (!box) return;
+  if (field) field.hidden = false;
+  if (sendBtn) { sendBtn.hidden = false; sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
+  box.hidden = false;
+  box.style.display = 'grid';
+  if (input) input.value = loginEmail?.value.trim() || '';
+  if (message) { message.textContent = ''; message.style.color = ''; }
+  setTimeout(() => input?.focus(), 0);
+}
+
+async function sendPartnerForgotPassword() {
+  const input = byId('partnerForgotEmail');
+  const email = (input?.value || byId('partnerLoginEmail')?.value || '').trim();
+  const message = byId('partnerForgotMessage');
+  const sendBtn = byId('partnerForgotSendBtn');
+  const field = input?.closest('.field');
+  if (message) { message.textContent = ''; message.style.color = ''; }
   if (!email) {
-    if (message) message.textContent = 'Önce e-posta adresini yaz.';
-    showToast('Önce e-posta adresini yaz.', 'error');
+    if (message) { message.textContent = 'Mail adresini yaz.'; message.style.color = '#b42318'; }
+    showToast('Mail adresini yaz.', 'error');
+    input?.focus();
     return;
   }
-  const data = await API.post('/api/auth/forgot-password', { email, role: 'partner' });
-  if (message) message.textContent = data.message || 'Şifre yenileme linki mail adresine gönderildi.';
-  showToast('Şifre yenileme maili gönderildi.', 'success');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Gönderiliyor...'; }
+  try {
+    await API.post('/api/auth/forgot-password', { email, role: 'partner' });
+    if (input) input.value = '';
+    if (byId('partnerLoginEmail')) byId('partnerLoginEmail').value = '';
+    if (byId('partnerLoginPassword')) byId('partnerLoginPassword').value = '';
+    if (field) field.hidden = true;
+    if (sendBtn) sendBtn.hidden = true;
+    if (message) { message.textContent = 'Şifre yenilemek için mailinizi kontrol edin.'; message.style.color = '#256b3a'; }
+    showToast('Şifre yenileme maili gönderildi.', 'success');
+  } catch (error) {
+    if (message) { message.textContent = error.message || 'Mail gönderilemedi.'; message.style.color = '#b42318'; }
+    throw error;
+  } finally {
+    if (sendBtn && !sendBtn.hidden) { sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
+  }
 }
 
 async function registerPartner() {
@@ -497,7 +538,8 @@ async function addSlot() {
 
 function bindEvents() {
   byId('partnerLoginBtn').addEventListener('click', () => loginPartner().catch((error) => showToast(error.message, 'error')));
-  byId('partnerForgotBtn')?.addEventListener('click', () => sendPartnerForgotPassword().catch((error) => showToast(error.message, 'error')));
+  byId('partnerForgotBtn')?.addEventListener('click', openPartnerForgotPassword);
+  byId('partnerForgotSendBtn')?.addEventListener('click', () => sendPartnerForgotPassword().catch((error) => showToast(error.message, 'error')));
   byId('partnerRegisterBtn').addEventListener('click', () => registerPartner().catch((error) => showToast(error.message, 'error')));
   byId('saveSalonBtn').addEventListener('click', () => saveSalon().catch((error) => showToast(error.message, 'error')));
   byId('addServiceBtn').addEventListener('click', () => addService().catch((error) => showToast(error.message, 'error')));

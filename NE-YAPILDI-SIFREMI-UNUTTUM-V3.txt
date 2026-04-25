@@ -1,0 +1,1 @@
+Şifremi unuttum akışı müşteri, partner, admin ve mobile app için kutu açılır -> mail girilir -> Gönder -> mailinizi kontrol edin mesajı olacak şekilde düzeltildi. Cache kırma eklendi.

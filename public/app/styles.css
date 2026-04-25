@@ -406,3 +406,7 @@ input#daySelect[type="date"], input#daySelect.date-input { display: none !import
 .hero-copy p { font-size: .78rem !important; font-weight: 400 !important; line-height: 1.42 !important; }
 .section-title h2 { font-size: 1.05rem !important; font-weight: 650 !important; letter-spacing: -.025em !important; line-height: 1.18 !important; }
 .bottom-nav button span { font-size: .67rem !important; font-weight: 600 !important; }
+
+#mobileForgotBox{border:1px solid rgba(31,25,39,.10);background:#faf9ff;border-radius:18px;padding:12px;display:grid;gap:9px;margin-top:2px}#mobileForgotBox.hidden{display:none!important}#mobileForgotBox .primary-btn{box-shadow:none!important}#mobileForgotMessage{margin:0!important;color:#256b3a!important;font-weight:700!important}
+
+.forgot-password-box [hidden] { display: none !important; }

@@ -613,7 +613,13 @@ function serveStatic(req, res, pathname) {
   if (fs.statSync(filePath).isDirectory()) filePath = path.join(filePath, 'index.html');
   const ext = path.extname(filePath).toLowerCase();
   const contentType = mimeTypes[ext] || 'application/octet-stream';
-  res.writeHead(200, { 'Content-Type': contentType });
+  const headers = { 'Content-Type': contentType };
+  if (['.html', '.js', '.css'].includes(ext)) {
+    headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate';
+    headers['Pragma'] = 'no-cache';
+    headers['Expires'] = '0';
+  }
+  res.writeHead(200, headers);
   fs.createReadStream(filePath).pipe(res);
 }
 
