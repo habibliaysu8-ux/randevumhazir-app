@@ -418,10 +418,17 @@ function getMailTransporter() {
 
 function publicBaseUrl(req) {
   const envUrl = String(process.env.PUBLIC_BASE_URL || process.env.APP_URL || process.env.RENDER_EXTERNAL_URL || '').trim();
-  if (envUrl) return envUrl.replace(/\/$/, '');
-  const proto = String(req.headers['x-forwarded-proto'] || 'http').split(',')[0].trim();
+  if (envUrl && /^https?:\/\//i.test(envUrl) && !/localhost|127\.0\.0\.1/i.test(envUrl)) {
+    return envUrl.replace(/\/$/, '');
+  }
   const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
-  return host ? (proto + '://' + host) : ('http://localhost:' + PORT);
+  if (host) {
+    const isLocal = /localhost|127\.0\.0\.1/i.test(host);
+    const proto = isLocal ? 'http' : 'https';
+    return proto + '://' + host;
+  }
+  if (envUrl) return envUrl.replace(/\/$/, '');
+  return 'http://localhost:' + PORT;
 }
 
 function createPasswordResetToken() {
@@ -646,14 +653,14 @@ async function handleApi(req, res, url) {
     db.passwordResets.push({ token, userId: user.id, email: user.email, role: user.role, expiresAt, createdAt: nowIso() });
     writeDb(db);
 
-    const resetLink = publicBaseUrl(req) + '/reset-password.html?token=' + token;
+    const resetLink = publicBaseUrl(req) + '/sifre-yenile/' + encodeURIComponent(token);
     let sent = false;
     try {
       sent = await sendAppMail({
         to: user.email,
         subject: 'Randevumhazır şifre yenileme',
         text: 'Merhaba ' + (user.name || "") + ',\n\nŞifreni yenilemek için bu linke tıkla:\n' + resetLink + '\n\nBu link 24 saat geçerlidir.',
-        html: '<div style="font-family:Arial,sans-serif;line-height:1.5;color:#111;"><h2>Şifre yenileme</h2><p>Merhaba ' + (user.name || "") + ',</p><p>Şifreni yenilemek için aşağıdaki butona tıkla.</p><p><a href="' + resetLink + '" style="display:inline-block;background:#111;color:#fff;padding:12px 18px;border-radius:999px;text-decoration:none;">Şifremi yenile</a></p><p style="font-size:13px;color:#666;">Bu link 24 saat geçerlidir.</p></div>'
+        html: '<div style="font-family:Arial,sans-serif;line-height:1.5;color:#111;background:#fff;padding:18px;"><h2 style="margin:0 0 12px;color:#111;">Şifre yenileme</h2><p>Merhaba ' + (user.name || "") + ',</p><p>Şifreni yenilemek için aşağıdaki butona tıkla.</p><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:18px 0;"><tr><td bgcolor="#111111" style="border-radius:999px;"><a href="' + resetLink + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:13px 22px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">Şifremi yenile</a></td></tr></table><p style="font-size:13px;color:#666;">Bu buton 24 saat geçerlidir.</p></div>'
       });
     } catch (error) {
       console.error('PASSWORD RESET MAIL ERROR:', error.message || error);
@@ -1062,6 +1069,8 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (url.pathname.startsWith('/sifre-yenile/')) return serveStatic(req, res, '/reset-password.html');
+    if (url.pathname === '/reset-password') return serveStatic(req, res, '/reset-password.html');
     if (url.pathname === '/partner') return serveStatic(req, res, '/partner.html');
     if (url.pathname === '/admin') return serveStatic(req, res, '/admin.html');
     if (url.pathname === '/customer' || url.pathname === '/musteri') return serveStatic(req, res, '/index.html');

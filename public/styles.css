@@ -2523,3 +2523,10 @@ body.fresha-inspired-body {
   color: #111111 !important;
   text-decoration: underline !important;
 }
+
+
+/* son istenen duzeltmeler siyah */
+.legal-consent-row, .legal-consent-row span, .legal-consent-row a { color: #111111 !important; }
+.legal-consent-row a { font-weight: 600 !important; text-decoration: none !important; }
+.legal-consent-row a:hover { color: #111111 !important; text-decoration: underline !important; }
+.legal-footer-v4 a { color: #111111 !important; font-size: 10px !important; font-weight: 400 !important; text-decoration: none !important; }

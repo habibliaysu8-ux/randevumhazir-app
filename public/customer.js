@@ -774,3 +774,54 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(applyFinalCustomerUiFixes, 500);
   setTimeout(applyFinalCustomerUiFixes, 1500);
 });
+
+
+// auth form temizleme son fix
+function clearCustomerAuthInputsFinal() {
+  ['loginEmail', 'loginPassword', 'registerName', 'registerPhone', 'registerEmail', 'registerPassword', 'forgotEmail'].forEach((id) => {
+    const el = byId(id);
+    if (!el) return;
+    el.value = '';
+    el.defaultValue = '';
+    el.setAttribute('autocomplete', 'off');
+  });
+  const legalConsent = byId('registerLegalConsent');
+  if (legalConsent) legalConsent.checked = false;
+  const forgotBox = byId('forgotInlineBox');
+  if (forgotBox) forgotBox.hidden = true;
+}
+function forceLegalConsentBlackFinal() {
+  document.querySelectorAll('.legal-consent-row, .legal-consent-row span, .legal-consent-row a, .legal-footer-v4 a').forEach((el) => {
+    el.style.color = '#111111';
+  });
+  document.querySelectorAll('.legal-footer-v4 a').forEach((el) => {
+    el.style.fontSize = '10px';
+    el.style.fontWeight = '400';
+  });
+}
+const originalOpenModalForClearFinal = typeof openModal === 'function' ? openModal : null;
+if (originalOpenModalForClearFinal && !window.__authClearFinalWrapped) {
+  window.__authClearFinalWrapped = true;
+  openModal = function openModalWithAuthClearFinal(id) {
+    originalOpenModalForClearFinal(id);
+    if (id === 'authModal') {
+      clearCustomerAuthInputsFinal();
+      setTimeout(clearCustomerAuthInputsFinal, 120);
+      setTimeout(clearCustomerAuthInputsFinal, 600);
+      setTimeout(forceLegalConsentBlackFinal, 0);
+    }
+  };
+}
+const originalCloseModalForClearFinal = typeof closeModal === 'function' ? closeModal : null;
+if (originalCloseModalForClearFinal && !window.__authCloseClearFinalWrapped) {
+  window.__authCloseClearFinalWrapped = true;
+  closeModal = function closeModalWithAuthClearFinal(id) {
+    originalCloseModalForClearFinal(id);
+    if (id === 'authModal') clearCustomerAuthInputsFinal();
+  };
+}
+document.addEventListener('DOMContentLoaded', () => {
+  forceLegalConsentBlackFinal();
+  clearCustomerAuthInputsFinal();
+  setTimeout(forceLegalConsentBlackFinal, 400);
+});

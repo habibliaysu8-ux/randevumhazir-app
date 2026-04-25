@@ -1,5 +1,6 @@
 const params = new URLSearchParams(window.location.search);
-const token = params.get('token') || '';
+const pathToken = window.location.pathname.startsWith('/sifre-yenile/') ? decodeURIComponent(window.location.pathname.split('/sifre-yenile/')[1] || '') : '';
+const token = params.get('token') || pathToken || '';
 const message = document.getElementById('resetMessage');
 const btn = document.getElementById('resetPasswordBtn');
 
