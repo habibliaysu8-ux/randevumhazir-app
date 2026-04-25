@@ -395,7 +395,7 @@ async function readBody(req) {
 let mailTransporter = null;
 
 function hasMailConfig() {
-  return Boolean(process.env.MAIL_HOST && process.env.MAIL_PORT && process.env.MAIL_USER && process.env.MAIL_PASS && process.env.MAIL_FROM);
+  return Boolean(process.env.MAIL_HOST && process.env.MAIL_PORT && process.env.MAIL_USER && process.env.MAIL_PASS);
 }
 
 function getMailTransporter() {
@@ -437,7 +437,7 @@ async function sendAppMail({ to, subject, text, html }) {
     return false;
   }
   await transporter.sendMail({
-    from: process.env.MAIL_FROM,
+    from: process.env.MAIL_FROM || process.env.MAIL_USER,
     to: email,
     subject,
     text,

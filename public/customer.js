@@ -278,7 +278,7 @@ function renderBookingPreview() {
 
   if (!customerState.customer) {
     hint.textContent = 'Giriş yaptıktan sonra yaklaşan randevuların burada görünür.';
-    authBtn.textContent = 'Giriş yap';
+    authBtn.textContent = 'Giriş / Kayıt';
     authBtn.onclick = () => openModal('authModal');
     container.innerHTML = '<div class="empty-inline">Henüz giriş yapılmadı.</div>';
     return;
@@ -727,3 +727,42 @@ if (originalBindEventsFixed && !window.__forgotFixedWrapped) {
 }
 
 initPage().catch((error) => showToast(error.message, 'error'));
+
+
+// Randevumhazır final UI guard - eski yazıları JS tekrar yazarsa geri düzeltir
+function applyFinalCustomerUiFixes() {
+  const authBtn = byId('openAuthBtn');
+  if (authBtn && !customerState.customer) authBtn.textContent = 'Giriş / Kayıt';
+
+  const chipRow = document.querySelector('.filter-chip-row-v4');
+  if (chipRow) chipRow.remove();
+
+  const districtSection = document.querySelector('.district-section-v4');
+  if (districtSection) districtSection.remove();
+
+  document.querySelectorAll('.modal-header .eyebrow').forEach((el) => {
+    if ((el.textContent || '').trim() === 'Müşteri hesabı') el.remove();
+  });
+  document.querySelectorAll('.modal-title').forEach((el) => {
+    if ((el.textContent || '').trim() === 'Giriş yap veya kayıt ol') el.remove();
+  });
+  document.querySelectorAll('.auth-switch, .auth-footer, .login-switch, .register-switch').forEach((el) => el.remove());
+}
+
+const originalRenderBookingPreviewFinalFix = typeof renderBookingPreview === 'function' ? renderBookingPreview : null;
+if (originalRenderBookingPreviewFinalFix && !window.__finalUiFixWrapped) {
+  window.__finalUiFixWrapped = true;
+  renderBookingPreview = function renderBookingPreviewWithFinalFix() {
+    const result = originalRenderBookingPreviewFinalFix.apply(this, arguments);
+    applyFinalCustomerUiFixes();
+    setTimeout(applyFinalCustomerUiFixes, 50);
+    setTimeout(applyFinalCustomerUiFixes, 300);
+    return result;
+  };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyFinalCustomerUiFixes();
+  setTimeout(applyFinalCustomerUiFixes, 500);
+  setTimeout(applyFinalCustomerUiFixes, 1500);
+});
