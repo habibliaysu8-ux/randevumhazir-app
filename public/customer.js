@@ -87,13 +87,6 @@ function resolveServiceQuery(rawValue) {
 async function loadServiceOptions() {
   const { data } = await API.get('/api/catalog');
   customerState.serviceOptions = (data.services || []).filter((item) => item.label && !looksNumeric(item.label));
-  const list = byId('serviceSuggestions');
-  if (list) {
-    list.innerHTML = customerState.serviceOptions
-      .filter((item) => item.value)
-      .map((item) => `<option value="${item.label}"></option>`)
-      .join('');
-  }
   closeServiceSuggestionBox();
   cleanSearchInput();
 }
@@ -101,7 +94,7 @@ async function loadServiceOptions() {
 function serviceSuggestionsFor(rawValue = '') {
   const query = normalizeServiceValue(rawValue);
   const pool = customerState.serviceOptions.filter((item) => item.value && !looksNumeric(item.label));
-  if (!query) return pool.slice(0, 8);
+  if (!query) return [];
   return pool
     .filter((item) => normalizeServiceValue(item.label).includes(query) || normalizeServiceValue(item.value).includes(query))
     .slice(0, 8);
@@ -140,38 +133,41 @@ function setupServiceSearch() {
   const input = byId('searchInput');
   if (!input) return;
 
-  const releaseReadonly = () => {
-    if (input.hasAttribute('readonly')) input.removeAttribute('readonly');
+  // Sadece kullanıcı yazmaya başlayınca öneri göster.
+  // Tarayıcının siyah datalist menüsü kapalı; kendi beyaz öneri kutumuz kullanılacak.
+  input.removeAttribute('list');
+  input.removeAttribute('readonly');
+
+  const showTypedSuggestions = () => {
+    cleanSearchInput();
+    const value = String(input.value || '').trim();
+    if (!value) {
+      closeServiceSuggestionBox();
+      return;
+    }
+    renderServiceSuggestionBox(value);
   };
 
   ['focus', 'click', 'touchstart'].forEach((eventName) => {
     input.addEventListener(eventName, () => {
-      releaseReadonly();
-      cleanSearchInput();
-      renderServiceSuggestionBox(input.value);
+      if (!String(input.value || '').trim()) closeServiceSuggestionBox();
     }, { passive: eventName === 'touchstart' });
   });
 
   input.addEventListener('input', (event) => {
     if (looksNumeric(event.target.value)) event.target.value = '';
     event.target.dataset.userEdited = '1';
-    renderServiceSuggestionBox(event.target.value);
+    showTypedSuggestions();
   });
 
   input.addEventListener('blur', () => setTimeout(closeServiceSuggestionBox, 180));
 
   window.addEventListener('pageshow', () => {
     cleanSearchInput();
-    renderServiceSuggestionBox(input.value);
-  });
-
-  [120, 500, 1200, 2200].forEach((delay) => {
-    setTimeout(() => {
-      cleanSearchInput();
-      if (document.activeElement === input) renderServiceSuggestionBox(input.value);
-    }, delay);
+    closeServiceSuggestionBox();
   });
 }
+
 
 function setupDatePopover() {
   const button = byId('datePickerButton');
@@ -825,3 +821,20 @@ document.addEventListener('DOMContentLoaded', () => {
   clearCustomerAuthInputsFinal();
   setTimeout(forceLegalConsentBlackFinal, 400);
 });
+
+
+// Randevumhazır service search final guard: siyah tarayıcı menüsünü kapat, önerileri sadece yazınca göster.
+function applyServiceSearchFinalGuard() {
+  const input = byId('searchInput');
+  if (input) {
+    input.removeAttribute('list');
+    input.removeAttribute('readonly');
+  }
+  const datalist = byId('serviceSuggestions');
+  if (datalist) datalist.remove();
+  const box = byId('serviceSuggestionBox');
+  if (box && (!input || !String(input.value || '').trim())) box.hidden = true;
+}
+window.addEventListener('load', applyServiceSearchFinalGuard);
+setTimeout(applyServiceSearchFinalGuard, 250);
+setTimeout(applyServiceSearchFinalGuard, 1000);
