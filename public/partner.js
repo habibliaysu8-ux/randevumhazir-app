@@ -25,6 +25,8 @@ function clearPartnerAuthInputs() {
     const el = byId(id);
     if (el) el.value = '';
   });
+  const forgotMessage = byId('partnerForgotMessage');
+  if (forgotMessage) forgotMessage.textContent = '';
 }
 
 function clearPaymentInputs() {
@@ -375,6 +377,20 @@ async function loginPartner() {
   showToast('Partner girişi başarılı.', 'success');
 }
 
+async function sendPartnerForgotPassword() {
+  const email = byId('partnerLoginEmail').value.trim();
+  const message = byId('partnerForgotMessage');
+  if (message) message.textContent = '';
+  if (!email) {
+    if (message) message.textContent = 'Önce e-posta adresini yaz.';
+    showToast('Önce e-posta adresini yaz.', 'error');
+    return;
+  }
+  const data = await API.post('/api/auth/forgot-password', { email, role: 'partner' });
+  if (message) message.textContent = data.message || 'Şifre yenileme linki mail adresine gönderildi.';
+  showToast('Şifre yenileme maili gönderildi.', 'success');
+}
+
 async function registerPartner() {
   const name = byId('partnerRegisterName').value.trim();
   const phone = byId('partnerRegisterPhone').value.trim();
@@ -481,6 +497,7 @@ async function addSlot() {
 
 function bindEvents() {
   byId('partnerLoginBtn').addEventListener('click', () => loginPartner().catch((error) => showToast(error.message, 'error')));
+  byId('partnerForgotBtn')?.addEventListener('click', () => sendPartnerForgotPassword().catch((error) => showToast(error.message, 'error')));
   byId('partnerRegisterBtn').addEventListener('click', () => registerPartner().catch((error) => showToast(error.message, 'error')));
   byId('saveSalonBtn').addEventListener('click', () => saveSalon().catch((error) => showToast(error.message, 'error')));
   byId('addServiceBtn').addEventListener('click', () => addService().catch((error) => showToast(error.message, 'error')));

@@ -1,0 +1,53 @@
+RANDEVUMHAZIR - MAIL SISTEMI KURULUMU
+
+Bu pakette mail sistemi tum ana akislara baglandi:
+
+1) Sifremi unuttum maili
+- Mobile app: /app giris ekraninda calisir.
+- Musteri paneli: ana sayfa giris modalinda calisir.
+- Partner paneli: /partner giris ekraninda calisir.
+- Admin paneli: /admin giris ekraninda calisir.
+- Link /reset-password.html sayfasina gider.
+- Link 45 dakika gecerlidir.
+
+2) Randevu alindi maili
+- Musteri randevu olusturunca musterinin mailine bilgi gider.
+- Partnerin mailine yeni randevu talebi gider.
+- Admin mail hesaplarina yeni randevu bildirimi gider.
+
+3) Partner onayladi / reddetti maili
+- Partner randevuyu onaylayinca musterinin mailine onay maili gider.
+- Partner randevuyu reddedince musterinin mailine red maili gider.
+- Partner ve admin tarafina da durum maili gider.
+
+GMAIL APP PASSWORD BAGLAMA
+
+Render > Environment alanina sunlari ekle:
+
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_SECURE=false
+MAIL_USER=seninmailin@gmail.com
+MAIL_PASS=Google App Password kodun
+MAIL_FROM="Randevumhazir <seninmailin@gmail.com>"
+PUBLIC_BASE_URL=https://senin-render-linkin.onrender.com
+
+Onemli:
+- Gmail normal sifreni MAIL_PASS alanina yazma.
+- Google hesabinda 2 adimli dogrulama acik olmali.
+- Google > Security > App Passwords kismindan uygulama sifresi al.
+- App Password 16 karakter gibi gorunur. Bosluklari olmadan MAIL_PASS alanina koy.
+- PUBLIC_BASE_URL dogru olmazsa sifre yenileme linki yanlis domainle gider.
+
+Deploy sonrasi test:
+1) Siteyi ac.
+2) Musteri girisinde e-posta yazip "Sifremi unuttum"a bas.
+3) Mail geldiyse linke basip yeni sifre belirle.
+4) Partner panelinde randevuyu onayla/reddet.
+5) Musteriye mail gelip gelmedigini kontrol et.
+
+Mail gelmiyorsa kontrol:
+- Render Environment degiskenleri dogru mu?
+- MAIL_PASS normal Gmail sifresi degil App Password mu?
+- Gmail 2FA acik mi?
+- Render'da son degisiklikten sonra redeploy yapildi mi?

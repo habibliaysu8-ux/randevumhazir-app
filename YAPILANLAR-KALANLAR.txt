@@ -1,0 +1,94 @@
+RANDEVUMHAZIR - YAPILANLAR / KALANLAR
+
+TAMAMLANDI
+
+✅ Gercek kullanici kayit sistemi
+- Musteri kaydi calisiyor.
+- Partner kaydi calisiyor.
+- Admin ilk hesap sistemi var.
+
+✅ Sifreleri duz metinden cikarma
+- Yeni sifreler hash olarak kaydediliyor.
+- Eski duz sifreyle giris olursa sistem sifreyi hash'e ceviriyor.
+
+✅ Musteri paneli / ana sayfa
+- Salon arama, sehir/ilce filtreleri, gun/saat filtreleri var.
+- Musteri giris/kayit modal tasarimi var.
+- Musteri randevu olusturabiliyor.
+- Musterinin randevulari panelde gorunuyor.
+
+✅ Partner paneli
+- Partner giris/kayit var.
+- Salon profili kaydetme var.
+- Hizmet, uzman ve saat ekleme var.
+- Partnerin actigi saatler musteri tarafinda gorunuyor.
+- Randevu onayla/reddet var.
+- 2 gun ucretsiz kullanim ve paket alani var.
+
+✅ Admin paneli
+- Admin girisi var.
+- Kullanici, salon ve randevu listeleri gorunuyor.
+- Salon durumu / one cikar gibi admin kontrolleri var.
+
+✅ Mobile app / PWA musteri tarafi
+- /app klasorunde musterinin mobil app arayuzu var.
+- Manifest ve service worker var.
+- Mobile auth duzeltmeleri var.
+- Mobil app musteri giris/kayit/randevu akisina bagli.
+
+✅ Mail sistemi backend
+- Nodemailer eklendi.
+- Gmail SMTP icin .env.example hazir.
+- Sifremi unuttum API'si var.
+- Yeni sifre belirleme sayfasi var.
+- Randevu alindi maili var.
+- Partner onay/red maili var.
+
+✅ Mail sistemi tum panellere uygulandi
+- Mobile app sifremi unuttum var.
+- Musteri web panelinde sifremi unuttum var.
+- Partner panelinde sifremi unuttum var.
+- Admin panelinde sifremi unuttum var.
+
+KALANLAR
+
+⬜ Gmail App Password'i Render Environment'a eklemek
+- MAIL_HOST
+- MAIL_PORT
+- MAIL_SECURE
+- MAIL_USER
+- MAIL_PASS
+- MAIL_FROM
+- PUBLIC_BASE_URL
+
+⬜ Canli sitede mail testleri
+- Musteri sifremi unuttum maili testi
+- Partner sifremi unuttum maili testi
+- Admin sifremi unuttum maili testi
+- Randevu alindi maili testi
+- Partner onay/red maili testi
+
+⬜ Supabase/PostgreSQL kalici database kontrolu
+- DATABASE_URL dogru mu?
+- DATABASE_SSL=true mi?
+- Canli deployda veriler kaybolmadan duruyor mu?
+
+⬜ Gercek odeme sistemi
+- Simdilik paket alani demo mantiginda.
+- Iyzico/Stripe/PayTR gibi gercek odeme daha sonra baglanacak.
+
+⬜ Profesyonel mail servisi opsiyonu
+- Gmail ile baslandi.
+- Daha sonra Resend, Brevo, SendGrid gibi servislerden biri baglanabilir.
+
+⬜ Son mobil responsive kontrol
+- Musteri web sayfasi telefonda tekrar kontrol edilmeli.
+- Partner/admin paneller mobilde temel calisir ama son UI duzen kontrolu kaldi.
+
+⬜ Yayina alma son kontrol listesi
+- Domain baglama
+- SSL kontrolu
+- SEO baslik/aciklama
+- Gizlilik politikasi / KVKK metni
+- Kullanici sozlesmesi
+- Iletisim sayfasi

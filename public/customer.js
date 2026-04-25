@@ -541,6 +541,20 @@ async function loginCustomer() {
   if (customerState.selectedSlot) openModal('bookingModal');
 }
 
+async function sendCustomerForgotPassword() {
+  const email = byId('loginEmail').value.trim();
+  const message = byId('customerForgotMessage');
+  if (message) message.textContent = '';
+  if (!email) {
+    if (message) message.textContent = 'Önce e-posta adresini yaz.';
+    showToast('Önce e-posta adresini yaz.', 'error');
+    return;
+  }
+  const data = await API.post('/api/auth/forgot-password', { email, role: 'customer' });
+  if (message) message.textContent = data.message || 'Şifre yenileme linki mail adresine gönderildi.';
+  showToast('Şifre yenileme maili gönderildi.', 'success');
+}
+
 async function registerCustomer() {
   const name = byId('registerName').value.trim();
   const phone = byId('registerPhone').value.trim();
@@ -638,6 +652,7 @@ function setupAuthTabs() {
 function bindEvents() {
   byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error')));
   byId('loginBtn').addEventListener('click', () => loginCustomer().catch((error) => showToast(error.message, 'error')));
+  byId('customerForgotBtn')?.addEventListener('click', () => sendCustomerForgotPassword().catch((error) => showToast(error.message, 'error')));
   byId('registerBtn').addEventListener('click', () => registerCustomer().catch((error) => showToast(error.message, 'error')));
   byId('confirmBookingBtn').addEventListener('click', () => confirmBooking().catch((error) => showToast(error.message, 'error')));
 

@@ -110,6 +110,20 @@ async function loginAdmin() {
   showToast('Admin girişi başarılı.', 'success');
 }
 
+async function sendAdminForgotPassword() {
+  const email = byId('adminEmail').value.trim();
+  const message = byId('adminForgotMessage');
+  if (message) message.textContent = '';
+  if (!email) {
+    if (message) message.textContent = 'Önce admin e-postasını yaz.';
+    showToast('Önce admin e-postasını yaz.', 'error');
+    return;
+  }
+  const data = await API.post('/api/auth/forgot-password', { email, role: 'admin' });
+  if (message) message.textContent = data.message || 'Şifre yenileme linki mail adresine gönderildi.';
+  showToast('Şifre yenileme maili gönderildi.', 'success');
+}
+
 async function toggleSalon(salonId, mode, nextStatus) {
   const salon = adminState.dashboard.salons.find((item) => item.id === salonId);
   await API.patch(`/api/admin/salons/${salonId}`, {
@@ -123,6 +137,7 @@ async function toggleSalon(salonId, mode, nextStatus) {
 
 function bindAdminEvents() {
   byId('adminLoginBtn').addEventListener('click', () => loginAdmin().catch((error) => showToast(error.message, 'error')));
+  byId('adminForgotBtn')?.addEventListener('click', () => sendAdminForgotPassword().catch((error) => showToast(error.message, 'error')));
   byId('adminLogoutBtn').addEventListener('click', () => {
     adminState.admin = null;
     adminState.dashboard = null;
