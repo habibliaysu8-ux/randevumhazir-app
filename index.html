@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=legal-v1" />
+  <link rel="stylesheet" href="/styles.css?v=legal-force-v1" />
 </head>
 <body class="customer-body fresha-home-body">
   <div class="app-shell fresha-page-shell">
@@ -190,6 +190,7 @@
             <div class="field"><label>Telefon</label><input id="registerPhone" type="tel" placeholder="05xx xxx xx xx" autocomplete="off" /></div>
             <div class="field"><label>E-posta</label><input id="registerEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" /></div>
             <div class="field"><label>Şifre</label><input id="registerPassword" type="password" placeholder="En az 6 karakter" autocomplete="new-password" /></div>
+            <label class="legal-consent"><input id="customerLegalConsent" type="checkbox" /> <span><a href="/kullanici-sozlesmesi.html" target="_blank">Kullanıcı Sözleşmesi</a> ve <a href="/kvkk.html" target="_blank">KVKK Aydınlatma Metni</a>’ni okudum, kabul ediyorum.</span></label>
             <button id="registerBtn" class="button dark full">Kayıt ol</button>
             <p class="auth-panel-note">Zaten hesabın var mı? <button type="button" class="auth-link-btn" data-auth-open="login">Giriş yap</button></p>
           </div>
@@ -247,9 +248,9 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="/shared.js?v=legal-v1"></script>
-  <script src="/customer.js?v=legal-v1"></script>
-<!-- legal-v1-fallback -->
+  <script src="/shared.js?v=legal-force-v1"></script>
+  <script src="/customer.js?v=legal-force-v1"></script>
+<!-- legal-force-v1-fallback -->
 <script>
 (function () {
   const forgotMap = {
@@ -308,5 +309,6 @@
 })();
 </script>
 
+<!-- legal-force-v1-marker -->
 </body>
 </html>

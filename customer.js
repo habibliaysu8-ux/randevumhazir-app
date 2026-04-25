@@ -612,7 +612,29 @@ async function sendCustomerForgotPassword() {
   }
 }
 
+function ensureCustomerLegalConsentBox() {
+  const registerBtn = byId('registerBtn');
+  if (!registerBtn) return;
+  let consent = byId('customerLegalConsent');
+  if (!consent) {
+    const label = document.createElement('label');
+    label.className = 'legal-consent';
+    label.innerHTML = '<input id="customerLegalConsent" type="checkbox" /> <span><a href="/kullanici-sozlesmesi.html" target="_blank">Kullanıcı Sözleşmesi</a> ve <a href="/kvkk.html" target="_blank">KVKK Aydınlatma Metni</a>’ni okudum, kabul ediyorum.</span>';
+    registerBtn.insertAdjacentElement('beforebegin', label);
+    consent = byId('customerLegalConsent');
+  }
+  const wrap = consent.closest('.legal-consent');
+  if (wrap) {
+    wrap.hidden = false;
+    wrap.style.display = 'grid';
+    wrap.style.visibility = 'visible';
+    wrap.style.opacity = '1';
+  }
+}
+
+
 async function registerCustomer() {
+  ensureCustomerLegalConsentBox();
   if (byId('customerLegalConsent') && !byId('customerLegalConsent').checked) {
     throw new Error('Kayıt için Kullanıcı Sözleşmesi ve KVKK Aydınlatma Metni onayı gerekir.');
   }
@@ -711,6 +733,7 @@ function setupAuthTabs() {
 }
 
 function bindEvents() {
+  ensureCustomerLegalConsentBox();
   byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error')));
   byId('loginBtn').addEventListener('click', () => loginCustomer().catch((error) => showToast(error.message, 'error')));
   byId('customerForgotBtn')?.addEventListener('click', openCustomerForgotPassword);
@@ -766,6 +789,7 @@ function bindEvents() {
   });
 
   setupAuthTabs();
+  ensureCustomerLegalConsentBox();
 }
 
 async function initPage() {
