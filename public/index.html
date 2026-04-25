@@ -235,5 +235,70 @@
 
   <script src="/shared.js"></script>
   <script src="/customer.js"></script>
+  <script>
+(function () {
+  const loginBtn = document.getElementById('loginBtn');
+  if (!loginBtn) return;
+
+  if (!document.getElementById('customerForgotBtn')) {
+    const btn = document.createElement('button');
+    btn.id = 'customerForgotBtn';
+    btn.type = 'button';
+    btn.textContent = 'Şifremi unuttum';
+    btn.style.cssText = 'border:0;background:transparent;color:#7f6ee6;font-weight:800;margin:6px auto;display:block;cursor:pointer;';
+    loginBtn.insertAdjacentElement('afterend', btn);
+  }
+
+  if (!document.getElementById('customerForgotBox')) {
+    const box = document.createElement('div');
+    box.id = 'customerForgotBox';
+    box.hidden = true;
+    box.style.cssText = 'margin-top:10px;border:1px solid #eee;background:#faf9ff;border-radius:18px;padding:12px;display:grid;gap:10px;';
+    box.innerHTML = `
+      <input id="customerForgotEmail" type="email" placeholder="Mail adresini yaz" style="width:100%;padding:12px;border-radius:14px;border:1px solid #ddd;">
+      <button id="customerForgotSendBtn" type="button" style="padding:12px;border-radius:14px;border:0;background:#1f1927;color:white;font-weight:800;">Gönder</button>
+      <p id="customerForgotMessage" style="margin:0;text-align:center;color:#256b3a;font-weight:700;"></p>
+    `;
+    document.getElementById('customerForgotBtn').insertAdjacentElement('afterend', box);
+  }
+
+  document.getElementById('customerForgotBtn').onclick = function () {
+    const box = document.getElementById('customerForgotBox');
+    box.hidden = !box.hidden;
+    box.style.display = box.hidden ? 'none' : 'grid';
+    const loginEmail = document.getElementById('loginEmail');
+    const forgotEmail = document.getElementById('customerForgotEmail');
+    if (loginEmail && forgotEmail && loginEmail.value) forgotEmail.value = loginEmail.value;
+  };
+
+  document.getElementById('customerForgotSendBtn').onclick = async function () {
+    const email = document.getElementById('customerForgotEmail').value.trim();
+    const msg = document.getElementById('customerForgotMessage');
+
+    if (!email) {
+      msg.style.color = '#b42318';
+      msg.textContent = 'Mail adresini yaz.';
+      return;
+    }
+
+    msg.style.color = '#6d6675';
+    msg.textContent = 'Gönderiliyor...';
+
+    try {
+      await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, role: 'customer' })
+      });
+
+      msg.style.color = '#256b3a';
+      msg.textContent = 'Şifre yenilemek için mailinizi kontrol edin.';
+    } catch (e) {
+      msg.style.color = '#b42318';
+      msg.textContent = 'Mail gönderilemedi. Tekrar deneyin.';
+    }
+  };
+})();
+</script>
 </body>
 </html>
