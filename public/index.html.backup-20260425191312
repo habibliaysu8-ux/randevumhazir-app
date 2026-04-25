@@ -15,7 +15,7 @@
       <header class="container fresha-topbar-v4 refined-topbar">
         <a href="/customer" class="brand-wordmark-v4 brand-wordmark-elegant" aria-label="randevumhazır ana sayfa">randevumhazır</a>
         <nav class="fresha-nav-v4 customer-only-nav">
-          <button id="openAuthBtn" class="nav-link-v4 plain-btn" type="button">Giriş / Kayıt</button>
+          <button id="openAuthBtn" class="nav-link-v4 plain-btn" type="button">Giriş yap</button>
         </nav>
       </header>
 
@@ -157,6 +157,8 @@
     <div class="modal-card small">
       <div class="modal-header">
         <div>
+          <div class="eyebrow">Müşteri hesabı</div>
+          <h3 class="modal-title">Giriş yap veya kayıt ol</h3>
         </div>
         <button class="modal-close" data-close="authModal">✕</button>
       </div>
@@ -167,7 +169,6 @@
             <div class="field"><label>E-posta</label><input id="loginEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" /></div>
             <div class="field"><label>Şifre</label><input id="loginPassword" type="password" placeholder="••••••••" autocomplete="new-password" /></div>
             <button id="loginBtn" class="button dark full">Giriş yap</button>
-            <button id="forgotPasswordBtn" type="button" class="text-btn auth-forgot-btn">Şifremi unuttum</button>
           </div>
         </div>
         <div class="sheet-card">
@@ -217,28 +218,6 @@
       <div class="modal-footer">
         <button class="button soft" data-close="bookingModal">Vazgeç</button>
         <button id="confirmBookingBtn" class="button dark">Randevuyu oluştur</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal" id="forgotPasswordModal">
-    <div class="modal-card small">
-      <div class="modal-header">
-        <div>
-          <h3 class="modal-title">Şifre yenileme</h3>
-          <p class="muted">Kayıtlı e-posta adresini yaz, şifre yenileme linki mailine gelsin.</p>
-        </div>
-        <button class="modal-close" data-close="forgotPasswordModal">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="field">
-          <label for="forgotEmail">E-posta</label>
-          <input id="forgotEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="button soft" data-close="forgotPasswordModal">Vazgeç</button>
-        <button id="sendForgotPasswordBtn" class="button dark" type="button">Gönder</button>
       </div>
     </div>
   </div>

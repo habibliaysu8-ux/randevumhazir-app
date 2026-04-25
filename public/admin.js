@@ -110,63 +110,6 @@ async function loginAdmin() {
   showToast('Admin girişi başarılı.', 'success');
 }
 
-function resetAdminAuthInputs() {
-  ['adminEmail', 'adminPassword', 'adminForgotEmail'].forEach((id) => { const el = byId(id); if (el) el.value = ''; });
-  const box = byId('adminForgotBox'); const input = byId('adminForgotEmail'); const message = byId('adminForgotMessage'); const sendBtn = byId('adminForgotSendBtn'); const field = input?.closest('.field');
-  if (message) { message.textContent = ''; message.style.color = ''; }
-  if (field) field.hidden = false;
-  if (sendBtn) { sendBtn.hidden = false; sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
-  if (box) { box.hidden = true; box.style.display = ''; }
-}
-
-function openAdminForgotPassword() {
-  const box = byId('adminForgotBox');
-  const input = byId('adminForgotEmail');
-  const loginEmail = byId('adminEmail');
-  const message = byId('adminForgotMessage');
-  const sendBtn = byId('adminForgotSendBtn');
-  const field = input?.closest('.field');
-  if (!box) return;
-  if (field) field.hidden = false;
-  if (sendBtn) { sendBtn.hidden = false; sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
-  box.hidden = false;
-  box.style.display = 'grid';
-  if (input) input.value = loginEmail?.value.trim() || '';
-  if (message) { message.textContent = ''; message.style.color = ''; }
-  setTimeout(() => input?.focus(), 0);
-}
-
-async function sendAdminForgotPassword() {
-  const input = byId('adminForgotEmail');
-  const email = (input?.value || byId('adminEmail')?.value || '').trim();
-  const message = byId('adminForgotMessage');
-  const sendBtn = byId('adminForgotSendBtn');
-  const field = input?.closest('.field');
-  if (message) { message.textContent = ''; message.style.color = ''; }
-  if (!email) {
-    if (message) { message.textContent = 'Mail adresini yaz.'; message.style.color = '#b42318'; }
-    showToast('Mail adresini yaz.', 'error');
-    input?.focus();
-    return;
-  }
-  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Gönderiliyor...'; }
-  try {
-    await API.post('/api/auth/forgot-password', { email, role: 'admin' });
-    if (input) input.value = '';
-    if (byId('adminEmail')) byId('adminEmail').value = '';
-    if (byId('adminPassword')) byId('adminPassword').value = '';
-    if (field) field.hidden = true;
-    if (sendBtn) sendBtn.hidden = true;
-    if (message) { message.textContent = 'Şifre yenilemek için mailinizi kontrol edin.'; message.style.color = '#256b3a'; }
-    showToast('Şifre yenileme maili gönderildi.', 'success');
-  } catch (error) {
-    if (message) { message.textContent = error.message || 'Mail gönderilemedi.'; message.style.color = '#b42318'; }
-    throw error;
-  } finally {
-    if (sendBtn && !sendBtn.hidden) { sendBtn.disabled = false; sendBtn.textContent = 'Gönder'; }
-  }
-}
-
 async function toggleSalon(salonId, mode, nextStatus) {
   const salon = adminState.dashboard.salons.find((item) => item.id === salonId);
   await API.patch(`/api/admin/salons/${salonId}`, {
@@ -180,8 +123,6 @@ async function toggleSalon(salonId, mode, nextStatus) {
 
 function bindAdminEvents() {
   byId('adminLoginBtn').addEventListener('click', () => loginAdmin().catch((error) => showToast(error.message, 'error')));
-  byId('adminForgotBtn')?.addEventListener('click', openAdminForgotPassword);
-  byId('adminForgotSendBtn')?.addEventListener('click', () => sendAdminForgotPassword().catch((error) => showToast(error.message, 'error')));
   byId('adminLogoutBtn').addEventListener('click', () => {
     adminState.admin = null;
     adminState.dashboard = null;

@@ -2410,31 +2410,3 @@ body.fresha-inspired-body {
     grid-template-columns: 1fr;
   }
 }
-
-
-/* Randevumhazır 25.04 UI temizliği */
-#authModal .modal-header .eyebrow,
-#authModal .modal-header .modal-title,
-#authModal .modal-header > div:first-child,
-.filter-chip-row-v4,
-.district-section-v4,
-.auth-switch,
-.auth-switch-row,
-.form-switch,
-.switch-auth,
-.login-switch,
-.register-switch {
-  display: none !important;
-}
-
-#authModal .modal-header {
-  justify-content: flex-end !important;
-  border-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.auth-forgot-btn {
-  width: 100%;
-  text-align: center;
-  margin-top: 8px;
-}

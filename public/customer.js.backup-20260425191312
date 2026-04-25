@@ -681,49 +681,4 @@ async function initPage() {
   await Promise.all([loadFeatured(), searchStores()]);
 }
 
-
-// Randevumhazır 25.04 şifremi unuttum mail bağlantısı
-async function requestCustomerPasswordResetFixed() {
-  const forgotInput = byId('forgotEmail');
-  const loginInput = byId('loginEmail');
-  const email = String((forgotInput && forgotInput.value) || (loginInput && loginInput.value) || '').trim();
-  if (!email) {
-    showToast('E-posta adresini yaz.', 'error');
-    return;
-  }
-  await API.post('/api/auth/forgot-password', { email, role: 'customer' });
-  closeModal('forgotPasswordModal');
-  showToast('Şifre yenileme maili gönderildi. Gelen kutusu ve spam klasörünü kontrol et.', 'success');
-}
-
-function bindForgotPasswordFixed() {
-  const openBtn = byId('forgotPasswordBtn') || document.querySelector('[data-forgot-password], .forgot-password-btn');
-  const sendBtn = byId('sendForgotPasswordBtn') || document.querySelector('[data-send-forgot-password], .send-forgot-password-btn');
-
-  if (openBtn && !openBtn.dataset.fixedBound) {
-    openBtn.dataset.fixedBound = '1';
-    openBtn.addEventListener('click', () => {
-      const forgotInput = byId('forgotEmail');
-      const loginInput = byId('loginEmail');
-      if (forgotInput && loginInput && loginInput.value && !forgotInput.value) forgotInput.value = loginInput.value;
-      openModal('forgotPasswordModal');
-    });
-  }
-
-  if (sendBtn && !sendBtn.dataset.fixedBound) {
-    sendBtn.dataset.fixedBound = '1';
-    sendBtn.addEventListener('click', () => requestCustomerPasswordResetFixed().catch((error) => showToast(error.message, 'error')));
-  }
-}
-
-
-const originalBindEventsFixed = typeof bindEvents === 'function' ? bindEvents : null;
-if (originalBindEventsFixed && !window.__forgotFixedWrapped) {
-  window.__forgotFixedWrapped = true;
-  bindEvents = function bindEventsWithForgotFixed() {
-    originalBindEventsFixed();
-    bindForgotPasswordFixed();
-  };
-}
-
 initPage().catch((error) => showToast(error.message, 'error'));

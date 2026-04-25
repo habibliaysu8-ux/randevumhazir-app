@@ -2,7 +2,6 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const { URL } = require('node:url');
-const crypto = require('node:crypto');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
@@ -124,7 +123,6 @@ function normalizeDb(db) {
   db.slots = Array.isArray(db.slots) ? db.slots : [];
   db.bookings = Array.isArray(db.bookings) ? db.bookings : [];
   db.payments = Array.isArray(db.payments) ? db.payments : [];
-  db.passwordResets = Array.isArray(db.passwordResets) ? db.passwordResets : [];
   db.users.forEach(ensurePartnerBilling);
   return db;
 }
@@ -224,8 +222,7 @@ function createSeedDb() {
     services: [],
     slots: [],
     bookings: [],
-    payments: [],
-    passwordResets: []
+    payments: []
   };
 }
 
@@ -414,20 +411,6 @@ function getMailTransporter() {
   return mailTransporter;
 }
 
-
-
-function publicBaseUrl(req) {
-  const envUrl = String(process.env.PUBLIC_BASE_URL || process.env.APP_URL || process.env.RENDER_EXTERNAL_URL || '').trim();
-  if (envUrl) return envUrl.replace(/\/$/, '');
-  const proto = String(req.headers['x-forwarded-proto'] || 'http').split(',')[0].trim();
-  const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
-  return host ? (proto + '://' + host) : ('http://localhost:' + PORT);
-}
-
-function createPasswordResetToken() {
-  return crypto.randomBytes(32).toString('hex');
-}
-
 async function sendAppMail({ to, subject, text, html }) {
   const email = String(to || '').trim();
   if (!email) return false;
@@ -454,7 +437,8 @@ function bookingSummaryText(booking) {
     `Tarih: ${booking.date || '-'} ${booking.startTime || ''}`.trim(),
     `Durum: ${booking.status || '-'}`,
     booking.notes ? `Not: ${booking.notes}` : ''
-  ].filter(Boolean).join('\n');
+  ].filter(Boolean).join('
+');
 }
 
 async function sendBookingCreatedMails(db, booking) {
@@ -625,52 +609,6 @@ async function handleApi(req, res, url) {
     if (!user) return json(res, 401, { error: 'E-posta, şifre veya rol hatalı.' });
     return json(res, 200, { user: publicUser(user) });
   }
-
-  if (req.method === 'POST' && ['/api/auth/forgot-password', '/api/auth/forgot', '/api/auth/request-password-reset', '/api/auth/reset-request'].includes(pathname)) {
-    const body = await readBody(req);
-    const email = String(body.email || '').trim().toLowerCase();
-    const role = String(body.role || '').trim();
-    if (!email) return json(res, 400, { error: 'E-posta zorunludur.' });
-
-    const user = db.users.find((item) => item.email === email && (!role || item.role === role));
-    if (!user) return json(res, 200, { ok: true });
-
-    const token = createPasswordResetToken();
-    const expiresAt = addDaysToIso(nowIso(), 1);
-    db.passwordResets = (db.passwordResets || []).filter((item) => item.userId !== user.id && !item.usedAt);
-    db.passwordResets.push({ token, userId: user.id, email: user.email, role: user.role, expiresAt, createdAt: nowIso() });
-    writeDb(db);
-
-    const resetLink = publicBaseUrl(req) + '/reset-password.html?token=' + token;
-    const sent = await sendAppMail({
-      to: user.email,
-      subject: 'Randevumhazır şifre yenileme',
-      text: 'Merhaba ' + (user.name || "") + ',\n\nŞifreni yenilemek için bu linke tıkla:\n' + resetLink + '\n\nBu link 24 saat geçerlidir.',
-      html: '<div style="font-family:Arial,sans-serif;line-height:1.5;color:#111;"><h2>Şifre yenileme</h2><p>Merhaba ' + (user.name || "") + ',</p><p>Şifreni yenilemek için aşağıdaki butona tıkla.</p><p><a href="' + resetLink + '" style="display:inline-block;background:#111;color:#fff;padding:12px 18px;border-radius:999px;text-decoration:none;">Şifremi yenile</a></p><p style="font-size:13px;color:#666;">Bu link 24 saat geçerlidir.</p></div>'
-    });
-
-    if (!sent) return json(res, 500, { error: 'Mail gönderilemedi. Render Environment bölümünde MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS ve MAIL_FROM değerlerini kontrol et.' });
-    return json(res, 200, { ok: true });
-  }
-
-  if (req.method === 'POST' && pathname === '/api/auth/reset-password') {
-    const body = await readBody(req);
-    const token = String(body.token || '').trim();
-    const password = String(body.password || '').trim();
-    if (!token || password.length < 6) return json(res, 400, { error: 'Geçersiz link veya şifre.' });
-
-    const reset = (db.passwordResets || []).find((item) => item.token === token && !item.usedAt);
-    if (!reset || new Date(reset.expiresAt).getTime() < Date.now()) return json(res, 400, { error: 'Şifre yenileme linki süresi dolmuş veya geçersiz.' });
-
-    const user = db.users.find((item) => item.id === reset.userId);
-    if (!user) return json(res, 404, { error: 'Kullanıcı bulunamadı.' });
-
-    user.password = password;
-    reset.usedAt = nowIso();
-    writeDb(db);
-    return json(res, 200, { ok: true });
-  }
-
 
   if (req.method === 'POST' && pathname === '/api/partner/subscribe') {
     const body = await readBody(req);
