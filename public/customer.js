@@ -546,6 +546,11 @@ async function registerCustomer() {
   const phone = byId('registerPhone').value.trim();
   const email = byId('registerEmail').value.trim();
   const password = byId('registerPassword').value.trim();
+  const legalConsent = byId('registerLegalConsent');
+  if (legalConsent && !legalConsent.checked) {
+    showToast('Kayıt için sözleşme ve KVKK onayını işaretle.', 'error');
+    return;
+  }
   const { user } = await API.post('/api/auth/register', { role: 'customer', name, phone, email, password });
   customerState.customer = user;
   Store.set(CUSTOMER_KEY, user);
@@ -692,13 +697,15 @@ async function requestCustomerPasswordResetFixed() {
     return;
   }
   await API.post('/api/auth/forgot-password', { email, role: 'customer' });
-  closeModal('forgotPasswordModal');
+  const inlineBox = byId('forgotInlineBox');
+  if (inlineBox) inlineBox.hidden = true;
   showToast('Şifre yenileme maili gönderildi. Gelen kutusu ve spam klasörünü kontrol et.', 'success');
 }
 
 function bindForgotPasswordFixed() {
   const openBtn = byId('forgotPasswordBtn') || document.querySelector('[data-forgot-password], .forgot-password-btn');
   const sendBtn = byId('sendForgotPasswordBtn') || document.querySelector('[data-send-forgot-password], .send-forgot-password-btn');
+  const inlineBox = byId('forgotInlineBox');
 
   if (openBtn && !openBtn.dataset.fixedBound) {
     openBtn.dataset.fixedBound = '1';
@@ -706,7 +713,8 @@ function bindForgotPasswordFixed() {
       const forgotInput = byId('forgotEmail');
       const loginInput = byId('loginEmail');
       if (forgotInput && loginInput && loginInput.value && !forgotInput.value) forgotInput.value = loginInput.value;
-      openModal('forgotPasswordModal');
+      if (inlineBox) inlineBox.hidden = !inlineBox.hidden;
+      if (forgotInput && inlineBox && !inlineBox.hidden) forgotInput.focus();
     });
   }
 

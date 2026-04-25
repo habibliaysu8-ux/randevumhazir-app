@@ -2438,3 +2438,54 @@ body.fresha-inspired-body {
   text-align: center;
   margin-top: 8px;
 }
+
+/* Randevumhazır - yalnızca istenen düzeltmeler */
+.forgot-inline-box {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.legal-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  line-height: 1.35;
+  color: #514a5f;
+}
+
+.legal-consent-row input {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  flex: 0 0 auto;
+}
+
+.legal-consent-row a,
+.legal-footer-v4 a {
+  color: #6c54ff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.legal-consent-row a:hover,
+.legal-footer-v4 a:hover {
+  text-decoration: underline;
+}
+
+.legal-footer-v4 {
+  max-width: 1180px;
+  margin: 22px auto 34px;
+  padding: 18px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 20px;
+  border-top: 1px solid rgba(17, 17, 17, 0.08);
+  font-size: 13px;
+}

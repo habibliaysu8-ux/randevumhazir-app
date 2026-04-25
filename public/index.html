@@ -88,34 +88,15 @@
         <section id="resultsSection" class="results-priority-section">
           <div class="section-header v4-header two-col-header-v4">
             <div>
-              <div class="eyebrow">Hızlı filtreler</div>
               <h2>Belirli saat için uygun salonlar</h2>
             </div>
 </div>
           <div id="resultsList" class="salon-results-grid salon-results-grid-v4"></div>
         </section>
 
-        <div class="fresha-shortcuts-v4">
-          <div class="shortcut-card-v4 shortcut-card-large-v4">
-            <span class="shortcut-label-v4">3 şehir</span>
-            <h3>İstanbul, Ankara ve İzmir</h3>
-            <p>Şehir seçimine göre ilçe listesi değişir; partner panelindeki salonlar aynı yapıya bağlanır.</p>
-          </div>
-          <div class="shortcut-card-v4">
-            <span class="shortcut-label-v4">Hızlı seçim</span>
-            <h3>Direkt saat seç</h3>
-            <p>Bugün 12:00 gibi spesifik saat filtreleriyle uygun salonları bul.</p>
-          </div>
-          <div class="shortcut-card-v4">
-            <span class="shortcut-label-v4">Bağlı sistem</span>
-            <h3>Partner ile canlı bağlı</h3>
-            <p>Partner panelinde açılan saatler anında müşteri tarafında görünür.</p>
-          </div>
-        </div>
 
 <section class="dashboard-banner customer-dashboard-strip fresha-account-strip-v4">
           <div>
-            <div class="eyebrow">Müşteri paneli</div>
             <h3>Yaklaşan randevuların</h3>
             <p id="customerPanelHint">Giriş yaptıktan sonra oluşturduğun randevular burada görünür.</p>
           </div>
@@ -125,7 +106,6 @@
         <section>
           <div class="section-header v4-header">
             <div>
-              <div class="eyebrow">Öne çıkanlar</div>
               <h2>İstanbul’da popüler salonlar</h2>
             </div>
           </div>
@@ -134,6 +114,14 @@
       </div>
     </section>
   </div>
+
+  <footer class="legal-footer-v4">
+    <a href="/kvkk-aydinlatma-metni.html" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>
+    <a href="/gizlilik-politikasi.html" target="_blank" rel="noopener">Gizlilik Politikası</a>
+    <a href="/kullanici-sozlesmesi.html" target="_blank" rel="noopener">Kullanıcı Sözleşmesi</a>
+    <a href="/partner-sozlesmesi.html" target="_blank" rel="noopener">Partner Sözleşmesi</a>
+    <a href="/iptal-iade-politikasi.html" target="_blank" rel="noopener">İptal / İade Politikası</a>
+  </footer>
 
   <div class="modal" id="authModal">
     <div class="modal-card small">
@@ -150,6 +138,13 @@
             <div class="field"><label>Şifre</label><input id="loginPassword" type="password" placeholder="••••••••" autocomplete="new-password" /></div>
             <button id="loginBtn" class="button dark full">Giriş yap</button>
             <button id="forgotPasswordBtn" type="button" class="text-btn auth-forgot-btn">Şifremi unuttum</button>
+            <div id="forgotInlineBox" class="forgot-inline-box" hidden>
+              <div class="field">
+                <label for="forgotEmail">E-posta</label>
+                <input id="forgotEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" />
+              </div>
+              <button id="sendForgotPasswordBtn" class="button dark full" type="button">Şifre yenileme maili gönder</button>
+            </div>
           </div>
         </div>
         <div class="sheet-card">
@@ -159,6 +154,10 @@
             <div class="field"><label>Telefon</label><input id="registerPhone" type="tel" placeholder="05xx xxx xx xx" autocomplete="off" /></div>
             <div class="field"><label>E-posta</label><input id="registerEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" /></div>
             <div class="field"><label>Şifre</label><input id="registerPassword" type="password" placeholder="En az 6 karakter" autocomplete="new-password" /></div>
+            <label class="legal-consent-row">
+              <input id="registerLegalConsent" type="checkbox" />
+              <span><a href="/kullanici-sozlesmesi.html" target="_blank" rel="noopener">Kullanıcı Sözleşmesi</a> ve <a href="/kvkk-aydinlatma-metni.html" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>’ni okudum, kabul ediyorum.</span>
+            </label>
             <button id="registerBtn" class="button dark full">Kayıt ol</button>
           </div>
         </div>
@@ -203,27 +202,6 @@
     </div>
   </div>
 
-  <div class="modal" id="forgotPasswordModal">
-    <div class="modal-card small">
-      <div class="modal-header">
-        <div>
-          <h3 class="modal-title">Şifre yenileme</h3>
-          <p class="muted">Kayıtlı e-posta adresini yaz, şifre yenileme linki mailine gelsin.</p>
-        </div>
-        <button class="modal-close" data-close="forgotPasswordModal">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="field">
-          <label for="forgotEmail">E-posta</label>
-          <input id="forgotEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="button soft" data-close="forgotPasswordModal">Vazgeç</button>
-        <button id="sendForgotPasswordBtn" class="button dark" type="button">Gönder</button>
-      </div>
-    </div>
-  </div>
 
   <div class="toast" id="toast"></div>
 
