@@ -12,6 +12,60 @@ const PUBLIC_DIR = path.join(ROOT, 'public');
 const DATA_DIR = path.join(ROOT, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 const GEO_CACHE_FILE = path.join(DATA_DIR, 'geo-cache.json');
+const SUPABASE_STATE_TABLE = 'randevumhazir_app_state';
+const SUPABASE_STATE_ID = 'main';
+
+let pgPool = null;
+let supabaseStateReady = false;
+
+function getDatabaseUrl() {
+  return String(
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.SUPABASE_DATABASE_URL ||
+    process.env.SUPABASE_DB_URL ||
+    ''
+  ).trim();
+}
+
+function isSupabaseEnabled() {
+  return Boolean(getDatabaseUrl()) && String(process.env.USE_LOCAL_JSON_DB || '').toLowerCase() !== 'true';
+}
+
+function getPgPool() {
+  if (!pgPool) {
+    const { Pool } = require('pg');
+    pgPool = new Pool({
+      connectionString: getDatabaseUrl(),
+      ssl: { rejectUnauthorized: false },
+      max: 3,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000
+    });
+  }
+  return pgPool;
+}
+
+async function ensureSupabaseStateTable() {
+  if (!isSupabaseEnabled() || supabaseStateReady) return;
+  const pool = getPgPool();
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ${SUPABASE_STATE_TABLE} (
+      id text PRIMARY KEY,
+      data jsonb NOT NULL,
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+
+  const existing = await pool.query(`SELECT id FROM ${SUPABASE_STATE_TABLE} WHERE id = $1 LIMIT 1`, [SUPABASE_STATE_ID]);
+  if (!existing.rowCount) {
+    await pool.query(
+      `INSERT INTO ${SUPABASE_STATE_TABLE} (id, data, updated_at) VALUES ($1, $2::jsonb, now())`,
+      [SUPABASE_STATE_ID, JSON.stringify(createSeedDb())]
+    );
+  }
+  supabaseStateReady = true;
+}
 
 const PROVINCES = [
   { id: 34, name: 'İstanbul' },
@@ -247,13 +301,33 @@ function ensureDataFiles() {
   }
 }
 
-function readDb() {
+async function readDb() {
+  if (isSupabaseEnabled()) {
+    await ensureSupabaseStateTable();
+    const result = await getPgPool().query(`SELECT data FROM ${SUPABASE_STATE_TABLE} WHERE id = $1 LIMIT 1`, [SUPABASE_STATE_ID]);
+    const raw = result.rows[0]?.data || createSeedDb();
+    return normalizeDb(raw);
+  }
+
   ensureDataFiles();
   return normalizeDb(safeJsonParse(fs.readFileSync(DB_FILE, 'utf-8'), createSeedDb()));
 }
 
-function writeDb(db) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
+async function writeDb(db) {
+  const normalized = normalizeDb(db);
+  if (isSupabaseEnabled()) {
+    await ensureSupabaseStateTable();
+    await getPgPool().query(
+      `INSERT INTO ${SUPABASE_STATE_TABLE} (id, data, updated_at)
+       VALUES ($1, $2::jsonb, now())
+       ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = now()`,
+      [SUPABASE_STATE_ID, JSON.stringify(normalized)]
+    );
+    return;
+  }
+
+  ensureDataFiles();
+  fs.writeFileSync(DB_FILE, JSON.stringify(normalized, null, 2), 'utf-8');
 }
 
 function getService(db, serviceId) {
@@ -324,8 +398,8 @@ function getSalonSummary(db, salon, filters = {}) {
   };
 }
 
-function ensureFutureSlots() {
-  const db = readDb();
+async function ensureFutureSlots() {
+  const db = await readDb();
   const salonIds = new Set(db.salons.map((item) => item.id));
   let changed = false;
 
@@ -347,7 +421,7 @@ function ensureFutureSlots() {
     return keep;
   });
 
-  if (changed) writeDb(db);
+  if (changed) await writeDb(db);
 }
 
 function getProvinces() {
@@ -556,7 +630,7 @@ function serveStatic(req, res, pathname) {
 
 async function handleApi(req, res, url) {
   const pathname = url.pathname;
-  const db = readDb();
+  const db = await readDb();
 
   if (req.method === 'GET' && pathname === '/api/health') {
     return json(res, 200, { ok: true, app: 'randevumhazır', cities: PROVINCES.map((item) => item.name), time: nowIso() });
@@ -619,7 +693,7 @@ async function handleApi(req, res, url) {
       ...(role === 'partner' ? { billing: { trialStartedAt: createdAt, trialEndsAt: addDaysToIso(createdAt, 2), activePlan: null, planStartedAt: null, planEndsAt: null, lastPaymentId: null } } : {})
     };
     db.users.push(user);
-    writeDb(db);
+    await writeDb(db);
     return json(res, 201, { user: publicUser(user) });
   }
 
@@ -651,7 +725,7 @@ async function handleApi(req, res, url) {
     const expiresAt = addDaysToIso(nowIso(), 1);
     db.passwordResets = (db.passwordResets || []).filter((item) => item.userId !== user.id && !item.usedAt);
     db.passwordResets.push({ token, userId: user.id, email: user.email, role: user.role, expiresAt, createdAt: nowIso() });
-    writeDb(db);
+    await writeDb(db);
 
     const resetLink = publicBaseUrl(req) + '/sifre-yenile/' + encodeURIComponent(token);
     let sent = false;
@@ -685,7 +759,7 @@ async function handleApi(req, res, url) {
 
     user.password = password;
     reset.usedAt = nowIso();
-    writeDb(db);
+    await writeDb(db);
     return json(res, 200, { ok: true });
   }
 
@@ -720,7 +794,7 @@ async function handleApi(req, res, url) {
     partner.billing.lastPaymentId = payment.id;
 
     db.payments.push(payment);
-    writeDb(db);
+    await writeDb(db);
 
     return json(res, 201, {
       data: {
@@ -824,7 +898,7 @@ async function handleApi(req, res, url) {
 
     slot.status = 'booked';
     db.bookings.push(booking);
-    writeDb(db);
+    await writeDb(db);
     await sendBookingCreatedMails(db, booking);
     return json(res, 201, { data: booking });
   }
@@ -851,7 +925,7 @@ async function handleApi(req, res, url) {
       slot.status = status === 'rejected' ? 'open' : 'booked';
     }
 
-    writeDb(db);
+    await writeDb(db);
     await sendBookingStatusMails(db, booking);
     return json(res, 200, { data: booking });
   }
@@ -908,7 +982,7 @@ async function handleApi(req, res, url) {
       db.salons.push(salon);
     }
 
-    writeDb(db);
+    await writeDb(db);
     return json(res, 200, { data: salon });
   }
 
@@ -933,7 +1007,7 @@ async function handleApi(req, res, url) {
     if (!isMeaningfulLabel(service.name) || !isMeaningfulLabel(service.category)) return json(res, 400, { error: 'Hizmet adı ve kategori sayı gibi görünemez.' });
     db.services.push(service);
     if (!salon.categories.includes(service.category)) salon.categories.push(service.category);
-    writeDb(db);
+    await writeDb(db);
     return json(res, 201, { data: service });
   }
 
@@ -954,7 +1028,7 @@ async function handleApi(req, res, url) {
     };
     if (!staff.name) return json(res, 400, { error: 'Uzman adı zorunlu.' });
     db.staff.push(staff);
-    writeDb(db);
+    await writeDb(db);
     return json(res, 201, { data: staff });
   }
 
@@ -983,7 +1057,7 @@ async function handleApi(req, res, url) {
     if (!slot.date || !slot.startTime) return json(res, 400, { error: 'Tarih ve saat zorunlu.' });
     if (slot.date < nextDate(0)) return json(res, 400, { error: 'Geçmiş gün için saat açılamaz.' });
     db.slots.push(slot);
-    writeDb(db);
+    await writeDb(db);
     return json(res, 201, { data: slot });
   }
 
@@ -1054,7 +1128,7 @@ async function handleApi(req, res, url) {
     if (!salon) return json(res, 404, { error: 'Salon bulunamadı.' });
     if (typeof body.isFeatured === 'boolean') salon.isFeatured = body.isFeatured;
     if (body.status) salon.status = body.status;
-    writeDb(db);
+    await writeDb(db);
     return json(res, 200, { data: salon });
   }
 
@@ -1082,7 +1156,9 @@ const server = http.createServer(async (req, res) => {
 });
 
 ensureDataFiles();
-ensureFutureSlots();
+ensureFutureSlots().catch((error) => {
+  console.error('SUPABASE/DB INIT ERROR:', error.message || error);
+});
 
 server.listen(PORT, () => {
   console.log(`randevumhazır running at http://localhost:${PORT}`);
