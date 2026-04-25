@@ -633,7 +633,12 @@ async function handleApi(req, res, url) {
     if (!email) return json(res, 400, { error: 'E-posta zorunludur.' });
 
     const user = db.users.find((item) => item.email === email && (!role || item.role === role));
-    if (!user) return json(res, 200, { ok: true });
+    if (!user) {
+      const message = role === 'customer'
+        ? 'Bu e-posta ile kayıtlı müşteri hesabı bulunamadı.'
+        : 'Bu e-posta ile kayıtlı hesap bulunamadı.';
+      return json(res, 404, { error: message });
+    }
 
     const token = createPasswordResetToken();
     const expiresAt = addDaysToIso(nowIso(), 1);
@@ -642,12 +647,18 @@ async function handleApi(req, res, url) {
     writeDb(db);
 
     const resetLink = publicBaseUrl(req) + '/reset-password.html?token=' + token;
-    const sent = await sendAppMail({
-      to: user.email,
-      subject: 'Randevumhazır şifre yenileme',
-      text: 'Merhaba ' + (user.name || "") + ',\n\nŞifreni yenilemek için bu linke tıkla:\n' + resetLink + '\n\nBu link 24 saat geçerlidir.',
-      html: '<div style="font-family:Arial,sans-serif;line-height:1.5;color:#111;"><h2>Şifre yenileme</h2><p>Merhaba ' + (user.name || "") + ',</p><p>Şifreni yenilemek için aşağıdaki butona tıkla.</p><p><a href="' + resetLink + '" style="display:inline-block;background:#111;color:#fff;padding:12px 18px;border-radius:999px;text-decoration:none;">Şifremi yenile</a></p><p style="font-size:13px;color:#666;">Bu link 24 saat geçerlidir.</p></div>'
-    });
+    let sent = false;
+    try {
+      sent = await sendAppMail({
+        to: user.email,
+        subject: 'Randevumhazır şifre yenileme',
+        text: 'Merhaba ' + (user.name || "") + ',\n\nŞifreni yenilemek için bu linke tıkla:\n' + resetLink + '\n\nBu link 24 saat geçerlidir.',
+        html: '<div style="font-family:Arial,sans-serif;line-height:1.5;color:#111;"><h2>Şifre yenileme</h2><p>Merhaba ' + (user.name || "") + ',</p><p>Şifreni yenilemek için aşağıdaki butona tıkla.</p><p><a href="' + resetLink + '" style="display:inline-block;background:#111;color:#fff;padding:12px 18px;border-radius:999px;text-decoration:none;">Şifremi yenile</a></p><p style="font-size:13px;color:#666;">Bu link 24 saat geçerlidir.</p></div>'
+      });
+    } catch (error) {
+      console.error('PASSWORD RESET MAIL ERROR:', error.message || error);
+      return json(res, 500, { error: 'Mail gönderilemedi. Render Environment bölümünde MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS ve MAIL_FROM değerlerini kontrol et.' });
+    }
 
     if (!sent) return json(res, 500, { error: 'Mail gönderilemedi. Render Environment bölümünde MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS ve MAIL_FROM değerlerini kontrol et.' });
     return json(res, 200, { ok: true });
