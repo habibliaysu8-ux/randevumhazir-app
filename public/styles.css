@@ -2532,8 +2532,25 @@ body.fresha-inspired-body {
 .legal-footer-v4 a { color: #111111 !important; font-size: 10px !important; font-weight: 400 !important; text-decoration: none !important; }
 
 
+/* Partner ve müşteri auth ortak düzeltmeleri */
 .legal-consent-row input[type="checkbox"] {
-  accent-color: #111111;
+  accent-color: #111111 !important;
+}
+
+.legal-consent-row,
+.legal-consent-row span,
+.legal-consent-row a {
+  color: #111111 !important;
+}
+
+.legal-consent-row a {
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+.legal-consent-row a:hover {
+  color: #111111 !important;
+  text-decoration: underline !important;
 }
 
 .inline-feedback {
@@ -2553,4 +2570,29 @@ body.fresha-inspired-body {
 
 .inline-feedback.success {
   color: #215d3b;
+}
+
+.legal-footer-v4 {
+  max-width: 1180px !important;
+  margin: 22px auto 34px !important;
+  padding: 14px 20px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 8px 16px !important;
+  border-top: 1px solid rgba(17, 17, 17, 0.08) !important;
+  font-size: 10px !important;
+}
+
+.legal-footer-v4 a {
+  color: #111111 !important;
+  font-size: 10px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+}
+
+.legal-footer-v4 a:hover {
+  color: #111111 !important;
+  text-decoration: underline !important;
 }

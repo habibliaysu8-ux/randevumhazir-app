@@ -525,6 +525,7 @@ function startBookingFlow() {
   openModal('bookingModal');
 }
 
+
 function setInlineFeedback(targetId, message = '', type = 'error') {
   const el = byId(targetId);
   if (!el) return;

@@ -21,11 +21,39 @@ function escapeHtml(value) {
 }
 
 function clearPartnerAuthInputs() {
-  ['partnerLoginEmail', 'partnerLoginPassword', 'partnerRegisterName', 'partnerRegisterPhone', 'partnerRegisterEmail', 'partnerRegisterPassword'].forEach((id) => {
+  ['partnerLoginEmail', 'partnerLoginPassword', 'partnerRegisterName', 'partnerRegisterPhone', 'partnerRegisterEmail', 'partnerRegisterPassword', 'partnerForgotEmail'].forEach((id) => {
     const el = byId(id);
     if (el) el.value = '';
   });
+  const consent = byId('partnerLegalConsent');
+  if (consent) consent.checked = false;
+  clearPartnerInlineFeedback?.();
 }
+
+function setPartnerInlineFeedback(targetId, message = '', type = 'error') {
+  const el = byId(targetId);
+  if (!el) return;
+  if (!message) {
+    el.hidden = true;
+    el.textContent = '';
+    el.className = 'inline-feedback';
+    return;
+  }
+  el.hidden = false;
+  el.textContent = message;
+  el.className = `inline-feedback ${type}`;
+}
+
+function clearPartnerInlineFeedback() {
+  setPartnerInlineFeedback('partnerLoginInlineFeedback');
+  setPartnerInlineFeedback('partnerRegisterInlineFeedback');
+  setPartnerInlineFeedback('partnerForgotInlineFeedback');
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+}
+
 
 function clearPaymentInputs() {
   ['cardHolder', 'cardNumber', 'cardExpiry', 'cardCvc'].forEach((id) => {
@@ -366,26 +394,97 @@ async function loadPartnerDashboard() {
 }
 
 async function loginPartner() {
+  clearPartnerInlineFeedback();
   const email = byId('partnerLoginEmail').value.trim();
   const password = byId('partnerLoginPassword').value.trim();
-  const { user } = await API.post('/api/auth/login', { email, password, role: 'partner' });
-  partnerState.partner = user;
-  Store.set(PARTNER_KEY, user);
-  await loadPartnerDashboard();
-  showToast('Partner girişi başarılı.', 'success');
+
+  if (!email && !password) {
+    setPartnerInlineFeedback('partnerLoginInlineFeedback', 'Giriş için e-posta ve şifreyi doldur.');
+    return;
+  }
+  if (!email) {
+    setPartnerInlineFeedback('partnerLoginInlineFeedback', 'E-posta alanını doldur.');
+    return;
+  }
+  if (!isValidEmail(email)) {
+    setPartnerInlineFeedback('partnerLoginInlineFeedback', 'Geçerli bir e-posta adresi yaz.');
+    return;
+  }
+  if (!password) {
+    setPartnerInlineFeedback('partnerLoginInlineFeedback', 'Şifre alanını doldur.');
+    return;
+  }
+
+  try {
+    const { user } = await API.post('/api/auth/login', { email, password, role: 'partner' });
+    partnerState.partner = user;
+    Store.set(PARTNER_KEY, user);
+    await loadPartnerDashboard();
+    showToast('Partner girişi başarılı.', 'success');
+  } catch (error) {
+    setPartnerInlineFeedback('partnerLoginInlineFeedback', error.message || 'Giriş yapılamadı.');
+  }
 }
 
 async function registerPartner() {
+  clearPartnerInlineFeedback();
   const name = byId('partnerRegisterName').value.trim();
   const phone = byId('partnerRegisterPhone').value.trim();
   const email = byId('partnerRegisterEmail').value.trim();
   const password = byId('partnerRegisterPassword').value.trim();
-  const { user } = await API.post('/api/auth/register', { role: 'partner', name, phone, email, password });
-  partnerState.partner = user;
-  Store.set(PARTNER_KEY, user);
-  clearPartnerAuthInputs();
-  await loadPartnerDashboard();
-  showToast('Partner hesabı oluşturuldu. 2 günlük ücretsiz kullanım başladı.', 'success');
+  const legalConsent = byId('partnerLegalConsent');
+
+  if (!name || !phone || !email || !password) {
+    setPartnerInlineFeedback('partnerRegisterInlineFeedback', 'Kayıt için tüm alanları doldur.');
+    return;
+  }
+  if (!isValidEmail(email)) {
+    setPartnerInlineFeedback('partnerRegisterInlineFeedback', 'Geçerli bir e-posta adresi yaz.');
+    return;
+  }
+  if (password.length < 6) {
+    setPartnerInlineFeedback('partnerRegisterInlineFeedback', 'Şifre en az 6 karakter olmalı.');
+    return;
+  }
+  if (legalConsent && !legalConsent.checked) {
+    setPartnerInlineFeedback('partnerRegisterInlineFeedback', 'Kayıt için Partner Sözleşmesi ve KVKK onayını işaretle.');
+    return;
+  }
+
+  try {
+    const { user } = await API.post('/api/auth/register', { role: 'partner', name, phone, email, password });
+    partnerState.partner = user;
+    Store.set(PARTNER_KEY, user);
+    clearPartnerAuthInputs();
+    await loadPartnerDashboard();
+    showToast('Partner hesabı oluşturuldu. 2 günlük ücretsiz kullanım başladı.', 'success');
+  } catch (error) {
+    setPartnerInlineFeedback('partnerRegisterInlineFeedback', error.message || 'Kayıt tamamlanamadı.');
+  }
+}
+
+async function sendPartnerForgotPasswordMail() {
+  clearPartnerInlineFeedback();
+  const forgotEmailInput = byId('partnerForgotEmail');
+  if (!forgotEmailInput) return;
+  const email = forgotEmailInput.value.trim().toLowerCase();
+
+  if (!email) {
+    setPartnerInlineFeedback('partnerForgotInlineFeedback', 'Şifre yenileme için e-posta yaz.');
+    return;
+  }
+  if (!isValidEmail(email)) {
+    setPartnerInlineFeedback('partnerForgotInlineFeedback', 'Geçerli bir e-posta adresi yaz.');
+    return;
+  }
+
+  try {
+    await API.post('/api/auth/forgot-password', { email, role: 'partner' });
+    setPartnerInlineFeedback('partnerForgotInlineFeedback', 'Şifre yenileme maili gönderildi.', 'success');
+    forgotEmailInput.value = '';
+  } catch (error) {
+    setPartnerInlineFeedback('partnerForgotInlineFeedback', error.message || 'Şifre yenileme maili gönderilemedi.');
+  }
 }
 
 async function purchasePlan() {
@@ -479,9 +578,29 @@ async function addSlot() {
   showToast('Saat yayınlandı. Müşteri panelinde aramaya dahil edildi.', 'success');
 }
 
+
+function bindPartnerAuthFeedbackReset() {
+  ['partnerLoginEmail', 'partnerLoginPassword', 'partnerRegisterName', 'partnerRegisterPhone', 'partnerRegisterEmail', 'partnerRegisterPassword', 'partnerForgotEmail'].forEach((id) => {
+    const el = byId(id);
+    if (!el) return;
+    el.addEventListener('input', () => clearPartnerInlineFeedback());
+  });
+  byId('partnerLegalConsent')?.addEventListener('change', () => clearPartnerInlineFeedback());
+}
+
 function bindEvents() {
-  byId('partnerLoginBtn').addEventListener('click', () => loginPartner().catch((error) => showToast(error.message, 'error')));
-  byId('partnerRegisterBtn').addEventListener('click', () => registerPartner().catch((error) => showToast(error.message, 'error')));
+  byId('partnerLoginBtn').addEventListener('click', loginPartner);
+  byId('partnerRegisterBtn').addEventListener('click', registerPartner);
+  byId('partnerForgotPasswordBtn')?.addEventListener('click', () => {
+    clearPartnerInlineFeedback();
+    const forgotInput = byId('partnerForgotEmail');
+    const loginInput = byId('partnerLoginEmail');
+    const inlineBox = byId('partnerForgotInlineBox');
+    if (forgotInput && loginInput && loginInput.value && !forgotInput.value) forgotInput.value = loginInput.value;
+    if (inlineBox) inlineBox.hidden = !inlineBox.hidden;
+    if (forgotInput && inlineBox && !inlineBox.hidden) forgotInput.focus();
+  });
+  byId('partnerSendForgotPasswordBtn')?.addEventListener('click', sendPartnerForgotPasswordMail);
   byId('saveSalonBtn').addEventListener('click', () => saveSalon().catch((error) => showToast(error.message, 'error')));
   byId('addServiceBtn').addEventListener('click', () => addService().catch((error) => showToast(error.message, 'error')));
   byId('addStaffBtn').addEventListener('click', () => addStaff().catch((error) => showToast(error.message, 'error')));
@@ -548,6 +667,7 @@ async function initPartnerPage() {
   clearPartnerAuthInputs();
   setTimeout(clearPartnerAuthInputs, 200);
   bindEvents();
+  bindPartnerAuthFeedbackReset();
   await loadPartnerDashboard();
 }
 

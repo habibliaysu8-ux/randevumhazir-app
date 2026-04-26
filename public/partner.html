@@ -24,10 +24,6 @@
           <div>
             <div class="eyebrow">Partner alanı</div>
             <h1>Salonunu aç, hizmetlerini ekle ve randevularını tek yerden yönet.</h1>
-            <p>
-              Giriş yaptıktan sonra mağaza profilini oluşturabilir, uzman ekleyebilir,
-              açık saatlerini yayınlayabilir ve müşteri paneline gerçek verilerini yansıtabilirsin.
-            </p>
             <div class="billing-inline-note">İlk 2 gün ücretsiz. Sonrasında günlük 200 TL veya haftalık 142 TL paketle devam edersin.</div>
           </div>
         </div>
@@ -40,6 +36,16 @@
               <div class="field"><label>E-posta</label><input id="partnerLoginEmail" name="partner_login_email" type="email" placeholder="ornek@mail.com" autocomplete="off" /></div>
               <div class="field"><label>Şifre</label><input id="partnerLoginPassword" name="partner_login_password" type="password" placeholder="••••••••" autocomplete="new-password" /></div>
               <button id="partnerLoginBtn" class="button dark full">Giriş yap</button>
+              <div id="partnerLoginInlineFeedback" class="inline-feedback" hidden></div>
+              <button id="partnerForgotPasswordBtn" type="button" class="text-btn auth-forgot-btn">Şifremi unuttum</button>
+              <div id="partnerForgotInlineBox" class="forgot-inline-box" hidden>
+                <div class="field">
+                  <label for="partnerForgotEmail">E-posta</label>
+                  <input id="partnerForgotEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" />
+                </div>
+                <button id="partnerSendForgotPasswordBtn" class="button dark full" type="button">Şifre yenileme maili gönder</button>
+                <div id="partnerForgotInlineFeedback" class="inline-feedback" hidden></div>
+              </div>
             </div>
           </section>
 
@@ -51,7 +57,12 @@
               <div class="field"><label>Telefon</label><input id="partnerRegisterPhone" type="tel" placeholder="05xx xxx xx xx" autocomplete="off" /></div>
               <div class="field"><label>E-posta</label><input id="partnerRegisterEmail" type="email" placeholder="ornek@mail.com" autocomplete="off" /></div>
               <div class="field"><label>Şifre</label><input id="partnerRegisterPassword" type="password" placeholder="En az 6 karakter" autocomplete="new-password" /></div>
-              <button id="partnerRegisterBtn" class="button soft full">Partner hesabı oluştur</button>
+              <label class="legal-consent-row">
+                <input id="partnerLegalConsent" type="checkbox" />
+                <span><a href="/partner-sozlesmesi.html" target="_blank" rel="noopener">Partner Sözleşmesi</a> ve <a href="/kvkk-aydinlatma-metni.html" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>’ni okudum, kabul ediyorum.</span>
+              </label>
+              <button id="partnerRegisterBtn" class="button dark full">Partner hesabı oluştur</button>
+              <div id="partnerRegisterInlineFeedback" class="inline-feedback" hidden></div>
             </div>
           </section>
         </div>
@@ -151,6 +162,13 @@
         </section>
       </section>
     </main>
+
+    <footer class="legal-footer-v4 partner-legal-footer">
+      <a href="/kvkk-aydinlatma-metni.html" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>
+      <a href="/gizlilik-politikasi.html" target="_blank" rel="noopener">Gizlilik Politikası</a>
+      <a href="/partner-sozlesmesi.html" target="_blank" rel="noopener">Partner Sözleşmesi</a>
+      <a href="/iptal-iade-politikasi.html" target="_blank" rel="noopener">İptal / İade Politikası</a>
+    </footer>
   </div>
 
   <div class="modal" id="slotsModal">
