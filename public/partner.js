@@ -1,6 +1,12 @@
 const PARTNER_KEY = 'randevumhazir_partner';
 const PARTNER_ACTION_BUTTONS = ['saveSalonBtn', 'addServiceBtn', 'addStaffBtn', 'addSlotBtn'];
 
+
+function partnerIsEditingSlotForm() {
+  const active = document.activeElement;
+  return Boolean(active && ['slotService', 'slotStaff', 'slotDate', 'slotTime'].includes(active.id));
+}
+
 function openModal(id) { byId(id)?.classList.add('open'); }
 function closeModal(id) { byId(id)?.classList.remove('open'); }
 function byIds(ids = []) { return ids.map((id) => byId(id)).filter(Boolean); }
@@ -40,7 +46,11 @@ function notifyPartnerNewBookings(bookings = []) {
   const newPending = pending.find((booking) => !seen.includes(booking.id));
   localStorage.setItem(key, JSON.stringify(pending.map((booking) => booking.id)));
   if (newPending) {
-    showPartnerPrettyNotification('Yeni rezervasyon geldi 🔔', `${newPending.serviceName || 'Hizmet'} için yeni bir randevu talebi var. Onaylayabilir veya reddedebilirsin.`, '📩');
+    const active = document.activeElement;
+    const editingSlot = active && ['slotService', 'slotStaff', 'slotDate', 'slotTime'].includes(active.id);
+    if (!editingSlot) {
+      showPartnerPrettyNotification('Yeni rezervasyon geldi 🔔', `${newPending.serviceName || 'Hizmet'} için yeni bir randevu talebi var. Onaylayabilir veya reddedebilirsin.`, '📩');
+    }
   }
 }
 
@@ -622,6 +632,14 @@ async function addStaff() {
 }
 
 async function addSlot() {
+  const slotService = byId('slotService')?.value || '';
+  const slotStaff = byId('slotStaff')?.value || '';
+  const slotDate = byId('slotDate')?.value || '';
+  const slotTime = byId('slotTime')?.value || '';
+  if (!slotService || !slotStaff || !slotDate || !slotTime) {
+    showToast('Saat eklemek için hizmet, uzman, tarih ve saat seç.', 'error');
+    return;
+  }
   const salon = getPrimarySalon();
   if (!salon) throw new Error('Önce salon profilini kaydet.');
   await API.post('/api/partner/slots', {
@@ -646,6 +664,17 @@ function bindPartnerAuthFeedbackReset() {
     el.addEventListener('input', () => clearPartnerInlineFeedback());
   });
   byId('partnerLegalConsent')?.addEventListener('change', () => clearPartnerInlineFeedback());
+}
+
+
+function bindSlotFieldStability() {
+  ['slotService', 'slotStaff', 'slotDate', 'slotTime'].forEach((id) => {
+    const el = byId(id);
+    if (!el || el.dataset.stableBound === '1') return;
+    el.dataset.stableBound = '1';
+    el.addEventListener('focus', () => { window.__partnerEditingSlot = true; });
+    el.addEventListener('blur', () => setTimeout(() => { window.__partnerEditingSlot = false; }, 350));
+  });
 }
 
 function bindEvents() {
@@ -728,6 +757,7 @@ async function initPartnerPage() {
   setTimeout(clearPartnerAuthInputs, 200);
   bindEvents();
   bindSalonImageUpload();
+  bindSlotFieldStability();
   bindPartnerAuthFeedbackReset();
   await loadPartnerDashboard();
 }

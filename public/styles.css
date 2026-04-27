@@ -2689,3 +2689,91 @@ body.fresha-inspired-body {
   font-size: 12px;
   color: #514a5f;
 }
+
+
+/* Final: müşteri yaklaşan rezervasyonlar sade premium tasarım */
+.customer-dashboard-strip,
+.fresha-account-strip-v4 {
+  max-width: 1040px !important;
+  margin: 36px auto 44px !important;
+  padding: 30px !important;
+  border-radius: 34px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  box-shadow: 0 24px 80px rgba(31, 26, 36, 0.12) !important;
+  display: grid !important;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.1fr) !important;
+  gap: 22px !important;
+  align-items: center !important;
+}
+
+.customer-dashboard-strip h3,
+.fresha-account-strip-v4 h3 {
+  margin: 0 0 10px !important;
+  font-size: clamp(26px, 3vw, 38px) !important;
+  letter-spacing: -0.04em !important;
+}
+
+#customerPanelHint {
+  margin: 0 !important;
+  color: #655d70 !important;
+  font-size: 14px !important;
+}
+
+#customerQuickContent.dashboard-banner-content {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.booking-pill-v4 {
+  min-width: 0 !important;
+  width: 100% !important;
+  padding: 16px 18px !important;
+  border-radius: 22px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  box-shadow: 0 12px 34px rgba(31, 26, 36, 0.07) !important;
+}
+
+.booking-pill-v4 strong {
+  display: block !important;
+  font-size: 15px !important;
+  margin-bottom: 6px !important;
+}
+
+.booking-pill-v4 span {
+  display: block !important;
+  font-size: 12px !important;
+  color: #5f5868 !important;
+  margin-top: 3px !important;
+}
+
+.booking-pill-v4 span:last-child {
+  display: inline-flex !important;
+  width: auto !important;
+  margin-top: 10px !important;
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.empty-inline {
+  border-radius: 18px !important;
+  background: #fff !important;
+  border: 1px dashed rgba(17,17,17,0.16) !important;
+  padding: 16px !important;
+  color: #5f5868 !important;
+}
+
+@media (max-width: 780px) {
+  .customer-dashboard-strip,
+  .fresha-account-strip-v4 {
+    grid-template-columns: 1fr !important;
+    padding: 22px !important;
+    margin: 26px 16px 34px !important;
+  }
+}
