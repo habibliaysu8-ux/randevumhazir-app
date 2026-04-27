@@ -82,16 +82,7 @@
       </main>
     </section>
 
-    <section id="resultsAnchor" class="results-shell fresha-results-shell-v4">
-      <div class="container stack-32">
-        <section id="resultsSection" class="results-priority-section">
-          <div class="section-header v4-header two-col-header-v4">
-            <div>
-              <h2>Belirli saat için uygun salonlar</h2>
-            </div>
-</div>
-          <div id="resultsList" class="salon-results-grid salon-results-grid-v4"></div>
-        </section>
+
 
 
 <section class="dashboard-banner customer-dashboard-strip fresha-account-strip-v4">
@@ -102,7 +93,18 @@
           <div id="customerQuickContent" class="dashboard-banner-content"></div>
         </section>
 
-        <section>
+        
+    <section id="resultsAnchor" class="results-shell fresha-results-shell-v4">
+      <div class="container stack-32">
+        <section id="resultsSection" class="results-priority-section">
+          <div class="section-header v4-header two-col-header-v4">
+            <div>
+              <h2>Belirli saat için uygun salonlar</h2>
+            </div>
+</div>
+          <div id="resultsList" class="salon-results-grid salon-results-grid-v4"></div>
+        </section>
+<section>
           <div class="section-header v4-header">
             <div>
               <h2>İstanbul’da popüler salonlar</h2>
@@ -206,6 +208,13 @@
 
 
   <div class="toast" id="toast"></div>
+  <div class="pretty-notification" id="prettyNotification" aria-live="polite" hidden>
+    <div class="pretty-notification-card">
+      <div class="pretty-notification-icon" id="prettyNotificationIcon">✨</div>
+      <h3 class="pretty-notification-title" id="prettyNotificationTitle">Harika!</h3>
+      <p class="pretty-notification-message" id="prettyNotificationMessage"></p>
+    </div>
+  </div>
 
   <script src="/shared.js"></script>
   <script src="/customer.js"></script>

@@ -12,6 +12,55 @@ const partnerState = {
   knownPendingBookingIds: new Set()
 };
 
+
+function showPartnerPrettyNotification(title, message, icon = '✨') {
+  const box = byId('partnerPrettyNotification');
+  if (!box) {
+    showToast(message || title, 'success');
+    return;
+  }
+  byId('partnerPrettyNotificationIcon').textContent = icon;
+  byId('partnerPrettyNotificationTitle').textContent = title;
+  byId('partnerPrettyNotificationMessage').textContent = message;
+  box.hidden = false;
+  requestAnimationFrame(() => box.classList.add('show'));
+  clearTimeout(showPartnerPrettyNotification.timer);
+  showPartnerPrettyNotification.timer = setTimeout(() => {
+    box.classList.remove('show');
+    setTimeout(() => { box.hidden = true; }, 220);
+  }, 5000);
+}
+
+function notifyPartnerNewBookings(bookings = []) {
+  if (!partnerState.partner) return;
+  const pending = bookings.filter((booking) => booking.status === 'pending');
+  const key = `randevumhazir_partner_pending_seen_${partnerState.partner.id}`;
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(key) || '[]'); } catch { seen = []; }
+  const newPending = pending.find((booking) => !seen.includes(booking.id));
+  localStorage.setItem(key, JSON.stringify(pending.map((booking) => booking.id)));
+  if (newPending) {
+    showPartnerPrettyNotification('Yeni rezervasyon geldi 🔔', `${newPending.serviceName || 'Hizmet'} için yeni bir randevu talebi var. Onaylayabilir veya reddedebilirsin.`, '📩');
+  }
+}
+
+function bindSalonImageUpload() {
+  const fileInput = byId('salonCoverImageFile');
+  if (!fileInput || fileInput.dataset.bound === '1') return;
+  fileInput.dataset.bound = '1';
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      byId('salonCoverImage').value = String(reader.result || '');
+      const note = byId('salonCoverImageNote');
+      if (note) note.textContent = `Seçildi: ${file.name}`;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -150,6 +199,8 @@ function hydrateSalonForm() {
   byId('salonCategory').value = salon.category || '';
   byId('salonAddress').value = salon.address || '';
   byId('salonCoverImage').value = salon.coverImage || '';
+  const coverNote = byId('salonCoverImageNote');
+  if (coverNote) coverNote.textContent = salon.coverImage ? 'Kapak görseli kayıtlı.' : 'Bilgisayarından salon fotoğrafı seçebilirsin.';
   byId('salonDescription').value = salon.description || '';
   byId('salonProvince').value = String(salon.cityId || 34);
   fillDistrictSelect(byId('salonDistrict'), Number(salon.cityId || 34), salon.district).catch(() => {});
@@ -376,6 +427,7 @@ async function loadPartnerDashboard() {
     partnerState.dashboard = null;
     togglePartnerView();
     renderPartnerDashboard();
+  if (partnerState.dashboard?.bookings) notifyPartnerNewBookings(partnerState.dashboard.bookings);
     return;
   }
 
@@ -646,7 +698,7 @@ function bindEvents() {
     try {
       await updateBookingStatus(bookingId, status);
       await loadPartnerDashboard();
-      showToast(status === 'confirmed' ? 'Randevu onaylandı.' : 'Randevu reddedildi.', 'success');
+      showPartnerPrettyNotification(status === 'confirmed' ? 'Randevu onaylandı ✅' : 'Randevu reddedildi ❌', status === 'confirmed' ? 'Müşteriye onay bilgisi gönderildi. ✨' : 'Müşteriye red bilgisi gönderildi.', status === 'confirmed' ? '✅' : '❌');
     } catch (error) {
       showToast(error.message, 'error');
       button.disabled = false;
@@ -675,6 +727,7 @@ async function initPartnerPage() {
   clearPartnerAuthInputs();
   setTimeout(clearPartnerAuthInputs, 200);
   bindEvents();
+  bindSalonImageUpload();
   bindPartnerAuthFeedbackReset();
   await loadPartnerDashboard();
 }

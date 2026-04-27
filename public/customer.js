@@ -306,7 +306,26 @@ function notifyCustomerBookingStatusChanges(bookings = []) {
     }
   });
   localStorage.setItem(key, JSON.stringify(next));
-  if (changedMessage) showToast(changedMessage, 'success');
+  if (changedMessage) showPrettyNotification(changedMessage + ' 🎉', 'Randevu durumun güncellendi. Detayları Yaklaşan randevular alanında görebilirsin. ✨', '✅');
+}
+
+
+function showPrettyNotification(title, message, icon = '✨') {
+  const box = byId('prettyNotification');
+  if (!box) {
+    showToast(message || title, 'success');
+    return;
+  }
+  byId('prettyNotificationIcon').textContent = icon;
+  byId('prettyNotificationTitle').textContent = title;
+  byId('prettyNotificationMessage').textContent = message;
+  box.hidden = false;
+  requestAnimationFrame(() => box.classList.add('show'));
+  clearTimeout(showPrettyNotification.timer);
+  showPrettyNotification.timer = setTimeout(() => {
+    box.classList.remove('show');
+    setTimeout(() => { box.hidden = true; }, 220);
+  }, 5000);
 }
 
 function renderBookingPreview() {
@@ -679,7 +698,7 @@ async function confirmBooking() {
   byId('bookingNotes').value = '';
   customerState.selectedSlot = null;
   closeModal('bookingModal');
-  showToast('Rezervasyon yapıldı. Partner onayı bekleniyor.', 'success');
+  showPrettyNotification('Rezervasyon talebin alındı 💅', 'Randevun partnere gönderildi. Onaylanınca burada ve mailinde göreceksin. ✨', '💌');
   await searchStores();
   renderBookingPreview();
 }

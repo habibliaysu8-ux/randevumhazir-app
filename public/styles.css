@@ -2596,3 +2596,96 @@ body.fresha-inspired-body {
   color: #111111 !important;
   text-decoration: underline !important;
 }
+
+
+/* Güzel bildirim penceresi */
+.pretty-notification {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 14, 24, 0.28);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.pretty-notification.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pretty-notification-card {
+  width: min(460px, calc(100vw - 36px));
+  border-radius: 28px;
+  padding: 28px 26px;
+  background: linear-gradient(135deg, #ffffff 0%, #fff8fe 52%, #f1e8ff 100%);
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  box-shadow: 0 26px 80px rgba(31, 26, 36, 0.22);
+  text-align: center;
+  transform: translateY(12px) scale(0.98);
+  transition: transform 180ms ease;
+}
+
+.pretty-notification.show .pretty-notification-card {
+  transform: translateY(0) scale(1);
+}
+
+.pretty-notification-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 28px;
+}
+
+.pretty-notification-title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  line-height: 1.15;
+  color: #111111;
+  font-weight: 800;
+}
+
+.pretty-notification-message {
+  margin: 0;
+  color: #514a5f;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* Yaklaşan randevular daha görünür ve şık */
+.customer-dashboard-strip,
+.fresha-account-strip-v4 {
+  margin-top: -12px !important;
+  border-radius: 30px !important;
+  background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(244,232,255,0.86), rgba(255,226,246,0.78)) !important;
+  box-shadow: 0 22px 70px rgba(107, 75, 130, 0.16) !important;
+  border: 1px solid rgba(116, 86, 148, 0.16) !important;
+}
+
+.customer-dashboard-strip h3,
+.fresha-account-strip-v4 h3 {
+  font-size: clamp(28px, 3vw, 42px) !important;
+}
+
+.booking-pill-v4 {
+  min-width: 190px !important;
+  padding: 18px 20px !important;
+  border-radius: 26px !important;
+  background: rgba(255,255,255,0.88) !important;
+  box-shadow: 0 12px 34px rgba(31, 26, 36, 0.08) !important;
+}
+
+/* Partner resim seçimi */
+.file-preview-note {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #514a5f;
+}

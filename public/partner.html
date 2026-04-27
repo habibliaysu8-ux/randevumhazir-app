@@ -99,7 +99,7 @@
               <div class="field"><label>Şehir</label><select id="salonProvince"></select></div>
               <div class="field"><label>İlçe</label><select id="salonDistrict"></select></div>
               <div class="field field-span-2"><label>Adres</label><input id="salonAddress" type="text" placeholder="Cadde, sokak, bina no" /></div>
-              <div class="field field-span-2"><label>Kapak görseli URL</label><input id="salonCoverImage" type="url" placeholder="https://..." /></div>
+              <div class="field field-span-2"><label>Kapak görseli seç</label><input id="salonCoverImageFile" type="file" accept="image/*" /><input id="salonCoverImage" type="hidden" /><div id="salonCoverImageNote" class="file-preview-note">Bilgisayarından salon fotoğrafı seçebilirsin.</div></div>
               <div class="field field-span-2"><label>Açıklama</label><textarea id="salonDescription" placeholder="Salonunun kısa tanımı"></textarea></div>
             </div>
             <div class="section-actions"><button id="saveSalonBtn" class="button dark">Salon profilini kaydet</button></div>
@@ -188,6 +188,13 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <div class="pretty-notification" id="partnerPrettyNotification" aria-live="polite" hidden>
+    <div class="pretty-notification-card">
+      <div class="pretty-notification-icon" id="partnerPrettyNotificationIcon">✨</div>
+      <h3 class="pretty-notification-title" id="partnerPrettyNotificationTitle">Bildirim</h3>
+      <p class="pretty-notification-message" id="partnerPrettyNotificationMessage"></p>
+    </div>
+  </div>
 
   <script src="/shared.js"></script>
   <script src="/partner.js"></script>
