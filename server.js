@@ -361,7 +361,9 @@ function slotMatchesRequest(db, slot, options = {}) {
   }
   if (q) {
     const searchBag = [service?.name, service?.category, staff?.name].map(slugify).join(' ');
-    if (!searchBag.includes(q)) return false;
+    const qTokens = q.split('-').filter((token) => token.length >= 3);
+    const tokenMatch = qTokens.length ? qTokens.some((token) => searchBag.includes(token)) : false;
+    if (!searchBag.includes(q) && !tokenMatch) return false;
   }
   return true;
 }
@@ -588,8 +590,8 @@ async function sendBookingStatusMails(db, booking) {
     if (customer?.email) {
       await sendAppMail({
         to: customer.email,
-        subject: `Rezervasyonun ${statusLabel}`,
-        text: `Rezervasyon durumun güncellendi: ${statusLabel}.
+        subject: `Randevun ${statusLabel}`,
+        text: `Randevu durumun güncellendi: ${statusLabel}.
 
 ${summary}`
       });

@@ -283,6 +283,32 @@ function updateActiveSummary(count) {
   el.textContent = searchSummaryText(currentSearchPayload(), count);
 }
 
+
+function bookingStatusCustomerLabel(status) {
+  if (status === 'confirmed') return 'Onaylandı';
+  if (status === 'rejected') return 'Reddedildi';
+  return 'Onay bekliyor';
+}
+
+function notifyCustomerBookingStatusChanges(bookings = []) {
+  if (!customerState.customer) return;
+  const key = `randevumhazir_customer_booking_status_${customerState.customer.id}`;
+  let previous = {};
+  try { previous = JSON.parse(localStorage.getItem(key) || '{}'); } catch { previous = {}; }
+
+  const next = {};
+  let changedMessage = '';
+  bookings.forEach((booking) => {
+    next[booking.id] = booking.status;
+    if (previous[booking.id] && previous[booking.id] !== booking.status) {
+      if (booking.status === 'confirmed') changedMessage = 'Rezervasyonun onaylandı.';
+      if (booking.status === 'rejected') changedMessage = 'Rezervasyonun reddedildi.';
+    }
+  });
+  localStorage.setItem(key, JSON.stringify(next));
+  if (changedMessage) showToast(changedMessage, 'success');
+}
+
 function renderBookingPreview() {
   const container = byId('customerQuickContent');
   const hint = byId('customerPanelHint');
@@ -311,11 +337,13 @@ function renderBookingPreview() {
         container.innerHTML = '<div class="empty-inline">Henüz randevu yok.</div>';
         return;
       }
+      notifyCustomerBookingStatusChanges(data.bookings);
       container.innerHTML = data.bookings.slice(0, 3).map((booking) => `
         <div class="booking-pill booking-pill-v4">
           <strong>${booking.serviceName}</strong>
           <span>${booking.salonName}</span>
           <span>${formatDate(booking.date)} · ${booking.startTime}</span>
+          <span>${bookingStatusCustomerLabel(booking.status)}</span>
         </div>
       `).join('');
     })
@@ -691,7 +719,7 @@ async function refreshDistrictsAndCloud() {
 }
 
 function bindEvents() {
-  byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: false }).catch((error) => showToast(error.message, 'error')));
+  byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error')));
   byId('loginBtn').addEventListener('click', loginCustomer);
   byId('registerBtn').addEventListener('click', registerCustomer);
   byId('confirmBookingBtn').addEventListener('click', () => confirmBooking().catch((error) => showToast(error.message, 'error')));
@@ -741,6 +769,12 @@ function bindEvents() {
   byId('citySelect').addEventListener('change', async () => {
     await refreshDistrictsAndCloud();
     await Promise.all([loadFeatured(), searchStores()]);
+  if (!window.customerStatusPollingStarted) {
+    window.customerStatusPollingStarted = true;
+    setInterval(() => {
+      if (customerState.customer) renderBookingPreview();
+    }, 5000);
+  }
   });
 }
 
@@ -763,6 +797,12 @@ async function initPage() {
   applySelectedVisuals();
   renderBookingPreview();
   await Promise.all([loadFeatured(), searchStores()]);
+  if (!window.customerStatusPollingStarted) {
+    window.customerStatusPollingStarted = true;
+    setInterval(() => {
+      if (customerState.customer) renderBookingPreview();
+    }, 5000);
+  }
 }
 
 
