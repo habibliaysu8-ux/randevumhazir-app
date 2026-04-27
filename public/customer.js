@@ -114,19 +114,35 @@ function renderServiceSuggestionBox(rawValue = byId('searchInput')?.value || '')
   `).join('');
   box.hidden = false;
   box.querySelectorAll('[data-service-value]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const input = byId('searchInput');
-      input.value = button.dataset.serviceValue;
-      input.dataset.userEdited = '1';
-      box.hidden = true;
-      searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error'));
-    });
+    const pick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      selectServiceSuggestionFinal(button.dataset.serviceValue || button.textContent);
+    };
+    button.addEventListener('pointerdown', pick);
+    button.addEventListener('mousedown', pick);
+    button.addEventListener('click', pick);
   });
 }
 
 function closeServiceSuggestionBox() {
   const box = byId('serviceSuggestionBox');
   if (box) box.hidden = true;
+}
+
+function selectServiceSuggestionFinal(value) {
+  const input = byId('searchInput');
+  const box = byId('serviceSuggestionBox');
+  const selectedValue = String(value || '').trim();
+  if (!input || !selectedValue) return;
+  input.value = selectedValue;
+  input.dataset.userEdited = '1';
+  customerState.selectedService = { name: selectedValue, label: selectedValue, value: selectedValue };
+  if (box) {
+    box.innerHTML = '';
+    box.hidden = true;
+  }
+  searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error'));
 }
 
 function setupServiceSearch() {
@@ -635,9 +651,9 @@ async function confirmBooking() {
   byId('bookingNotes').value = '';
   customerState.selectedSlot = null;
   closeModal('bookingModal');
+  showToast('Rezervasyon yapıldı. Partner onayı bekleniyor.', 'success');
   await searchStores();
   renderBookingPreview();
-  showToast('Randevu oluşturuldu.', 'success');
 }
 
 async function searchStores({ focusResults = false } = {}) {
@@ -905,3 +921,13 @@ function applyServiceSearchFinalGuard() {
 window.addEventListener('load', applyServiceSearchFinalGuard);
 setTimeout(applyServiceSearchFinalGuard, 250);
 setTimeout(applyServiceSearchFinalGuard, 1000);
+
+
+// serviceSuggestionDelegatedFinal: Hizmet önerisine tıklayınca/telefonla dokununca kesin seçilsin.
+document.addEventListener('pointerdown', (event) => {
+  const item = event.target.closest?.('[data-service-value], .service-suggestion-item');
+  if (!item) return;
+  event.preventDefault();
+  event.stopPropagation();
+  selectServiceSuggestionFinal(item.dataset.serviceValue || item.textContent);
+}, true);

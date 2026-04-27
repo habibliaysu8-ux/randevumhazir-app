@@ -8,7 +8,8 @@ function byIds(ids = []) { return ids.map((id) => byId(id)).filter(Boolean); }
 const partnerState = {
   partner: Store.get(PARTNER_KEY),
   dashboard: null,
-  selectedPlanCode: 'daily'
+  selectedPlanCode: 'daily',
+  knownPendingBookingIds: new Set()
 };
 
 function escapeHtml(value) {
@@ -326,7 +327,7 @@ function renderPartnerDashboard() {
   renderSlotPreview(data.slots, services, staff, salons);
 
   byId('partnerSlotsTable').innerHTML = tableFrom(
-    ['Salon', 'Hizmet', 'Uzman', 'Tarih/Saat', 'Durum'],
+    ['Salon', 'Hizmet', 'Uzman', 'Tarih/Saat', 'Durum / İşlem'],
     data.slots.filter((item) => item.status === 'open').map((slot) => {
       const service = services.find((item) => item.id === slot.serviceId);
       const member = staff.find((item) => item.id === slot.staffId);
@@ -344,7 +345,7 @@ function renderPartnerDashboard() {
   );
 
   byId('partnerBookingsTable').innerHTML = tableFrom(
-    ['Salon', 'Hizmet', 'Uzman', 'Tarih/Saat', 'Durum'],
+    ['Salon', 'Hizmet', 'Uzman', 'Tarih/Saat', 'Durum / İşlem'],
     data.bookings.map((booking) => `
       <tr>
         <td>${escapeHtml(booking.salonName)}</td>
@@ -380,9 +381,16 @@ async function loadPartnerDashboard() {
 
   try {
     const { data } = await API.get(`/api/partner/dashboard?userId=${partnerState.partner.id}`);
+    const pendingBookings = (data.bookings || []).filter((item) => item.status === 'pending');
+    const newPending = pendingBookings.filter((item) => !partnerState.knownPendingBookingIds.has(item.id));
     partnerState.dashboard = data;
     togglePartnerView();
     renderPartnerDashboard();
+    pendingBookings.forEach((item) => partnerState.knownPendingBookingIds.add(item.id));
+    if (newPending.length && !loadPartnerDashboard.silentFirstLoad) {
+      showToast('Yeni rezervasyon geldi. Onayla veya reddet.', 'success');
+    }
+    loadPartnerDashboard.silentFirstLoad = false;
   } catch (error) {
     partnerState.partner = null;
     partnerState.dashboard = null;
@@ -672,3 +680,11 @@ async function initPartnerPage() {
 }
 
 initPartnerPage().catch((error) => showToast(error.message, 'error'));
+
+// partnerDashboardAutoRefreshFinal: Müşteri rezervasyon yapınca partner paneli otomatik yenilensin.
+loadPartnerDashboard.silentFirstLoad = true;
+setInterval(() => {
+  if (partnerState.partner) {
+    loadPartnerDashboard().catch(() => {});
+  }
+}, 5000);
