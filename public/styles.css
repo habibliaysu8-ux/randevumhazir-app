@@ -2777,3 +2777,11 @@ body.fresha-inspired-body {
     margin: 26px 16px 34px !important;
   }
 }
+
+
+/* Final yukarı taşıma */
+.customer-dashboard-strip,
+.fresha-account-strip-v4 {
+  margin-top: -28px !important;
+  margin-bottom: 34px !important;
+}

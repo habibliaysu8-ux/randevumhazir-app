@@ -4,7 +4,7 @@ const PARTNER_ACTION_BUTTONS = ['saveSalonBtn', 'addServiceBtn', 'addStaffBtn', 
 
 function partnerIsEditingSlotForm() {
   const active = document.activeElement;
-  return Boolean(active && ['slotService', 'slotStaff', 'slotDate', 'slotTime'].includes(active.id));
+  return Boolean(window.__partnerEditingSlot || (active && ['slotService', 'slotStaff', 'slotDate', 'slotTime'].includes(active.id)));
 }
 
 function openModal(id) { byId(id)?.classList.add('open'); }
@@ -216,11 +216,30 @@ function hydrateSalonForm() {
   fillDistrictSelect(byId('salonDistrict'), Number(salon.cityId || 34), salon.district).catch(() => {});
 }
 
+
+function rememberSlotSelections() {
+  return {
+    service: byId('slotService')?.value || '',
+    staff: byId('slotStaff')?.value || '',
+    date: byId('slotDate')?.value || '',
+    time: byId('slotTime')?.value || ''
+  };
+}
+
+function restoreSlotSelections(saved = {}) {
+  if (saved.service && byId('slotService')) byId('slotService').value = saved.service;
+  if (saved.staff && byId('slotStaff')) byId('slotStaff').value = saved.staff;
+  if (saved.date && byId('slotDate')) byId('slotDate').value = saved.date;
+  if (saved.time && byId('slotTime')) byId('slotTime').value = saved.time;
+}
+
 function fillPartnerSelects() {
+  const saved = rememberSlotSelections();
   const services = partnerState.dashboard?.services || [];
   const staff = partnerState.dashboard?.staff || [];
   byId('slotService').innerHTML = '<option value="">Hizmet seç</option>' + services.map((item) => `<option value="${item.id}">${escapeHtml(item.name)} · ${item.duration} dk</option>`).join('');
   byId('slotStaff').innerHTML = '<option value="">Uzman seç</option>' + staff.map((item) => `<option value="${item.id}">${escapeHtml(item.name)} · ${escapeHtml(item.title)}</option>`).join('');
+  restoreSlotSelections(saved);
 }
 
 function renderSlotPreview(slots, services, staff, salons) {
@@ -677,6 +696,19 @@ function bindSlotFieldStability() {
   });
 }
 
+
+function bindPartnerSlotSelectFix() {
+  ['slotService', 'slotStaff', 'slotDate', 'slotTime'].forEach((id) => {
+    const el = byId(id);
+    if (!el || el.dataset.slotSelectFix === '1') return;
+    el.dataset.slotSelectFix = '1';
+    el.addEventListener('change', () => {
+      window.__partnerEditingSlot = true;
+      setTimeout(() => { window.__partnerEditingSlot = false; }, 800);
+    });
+  });
+}
+
 function bindEvents() {
   byId('partnerLoginBtn').addEventListener('click', loginPartner);
   byId('partnerRegisterBtn').addEventListener('click', registerPartner);
@@ -758,6 +790,7 @@ async function initPartnerPage() {
   bindEvents();
   bindSalonImageUpload();
   bindSlotFieldStability();
+  bindPartnerSlotSelectFix();
   bindPartnerAuthFeedbackReset();
   await loadPartnerDashboard();
 }
