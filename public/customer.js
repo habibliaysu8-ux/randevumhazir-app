@@ -142,7 +142,7 @@ function selectServiceSuggestionFinal(value) {
     box.innerHTML = '';
     box.hidden = true;
   }
-  searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error'));
+  searchStores({ focusResults: false }).catch((error) => showToast(error.message, 'error'));
 }
 
 function setupServiceSearch() {
@@ -343,7 +343,7 @@ function renderDistrictCloud(items, cityName = selectedCityName()) {
     chip.addEventListener('click', () => {
       byId('districtSelect').value = chip.dataset.districtChip;
       syncState();
-      searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error'));
+      searchStores({ focusResults: false }).catch((error) => showToast(error.message, 'error'));
     });
   });
 
@@ -691,7 +691,7 @@ async function refreshDistrictsAndCloud() {
 }
 
 function bindEvents() {
-  byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error')));
+  byId('searchBtn').addEventListener('click', () => searchStores({ focusResults: false }).catch((error) => showToast(error.message, 'error')));
   byId('loginBtn').addEventListener('click', loginCustomer);
   byId('registerBtn').addEventListener('click', registerCustomer);
   byId('confirmBookingBtn').addEventListener('click', () => confirmBooking().catch((error) => showToast(error.message, 'error')));
@@ -733,7 +733,7 @@ function bindEvents() {
     byId(id).addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        searchStores({ focusResults: true }).catch((error) => showToast(error.message, 'error'));
+        searchStores({ focusResults: false }).catch((error) => showToast(error.message, 'error'));
       }
     });
   });
@@ -930,4 +930,19 @@ document.addEventListener('pointerdown', (event) => {
   event.preventDefault();
   event.stopPropagation();
   selectServiceSuggestionFinal(item.dataset.serviceValue || item.textContent);
+}, true);
+
+
+// noAutoScrollAfterServiceSelect
+// Hizmet önerisi seçilince sayfa aşağı kaymasın; kullanıcı şehir/saat seçimlerine devam edebilsin.
+window.__noAutoScrollAfterServiceSelect = true;
+
+document.addEventListener("click", function (event) {
+  const item = event.target.closest("#serviceSuggestionBox button, #serviceSuggestionBox div, .service-suggestion-item, .service-item");
+  if (!item) return;
+
+  setTimeout(function () {
+    const searchShell = document.querySelector(".fresha-search-shell-v4, .search-shell-refined");
+    if (searchShell) searchShell.scrollIntoView({ behavior: "auto", block: "center" });
+  }, 0);
 }, true);
